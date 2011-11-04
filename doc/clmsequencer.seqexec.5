@@ -1,0 +1,146 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH seqexec 5 "August 2010" bullx "Sequencer Manual"
+.SH ISE Input File Format
+ISE Input File Format \- Instructions Sequence Executor File Format.
+.SH DESCRIPTION
+The
+.BR seqexec (1)
+action of the
+.BR clmsequencer (1)
+executes a sequence of instructions specified in an XML input file
+that conforms to the XSD Schema installed at
+.B clmsequencer/ise/ise.xsd
+relative to your Python library directory (usually at
+/usr/lib/python2.6/site-packages).
+
+A set of instructions is specified within the
+.B <instructions>
+tag of the XML file. Three kind of instructions can be specified:
+.TP
+.B Action:
+defined by the
+.B <action>
+tag. It specifies the actual command that should be
+executed. Attributes are:
+.RS 8
+.IP - 2
+.BR id :
+Each action should be identified by a unique string. This attribute is
+mandatory.
+.IP - 2
+.BR desc :
+a string that gives a human description of the purpose of the
+action. This string is displayed by the ISE when the action is
+executed if the
+.B \-\-verbose
+global option has been specified. This attribute is optionnal. Default
+is the empty string: '' if unset.
+.IP - 2
+.BR component_set :
+the set of components this command has a side effect on (if any). This
+should be in the following format:
+.IR name [ range ]# type ,
+where
+.I type
+is the component type. Example: 'node[1-10]#compute'.  As far as the
+ISE component is concerned, this attribute is ignored unless the
+.B remote
+attribute is set to true (see below). This attribute is
+optionnal. Default is 'localhost#unknown'.
+.IP - 2
+.BR remote :
+the command will be executed using the current shell unless this
+attribute is set to
+.BR true .
+In this case, ssh is used to execute the given command on the
+specified components described by the
+.B component_set
+attribute. The command will be executed on each device given by the
+first part of the component set name (the substring before the '#'
+symbol). This attribute is optionnal. Default is
+.B false.
+.IP - 2
+.BR deps :
+a list of ids this action depends on (explicit dependencies). The ISE
+will not execute the given command unless all its dependencies
+(explicit and implicit, see
+.B Sequence
+below) have completed successfully. This attribute is
+optionnal. Default is the empty string: ''. An executed action is
+considered successful in two cases:
+.RS 4
+.IP * 2
+its returned code is 0 (alias
+.BR OK ,
+python code: os.OK, see 'pydoc os');
+.IP * 2
+its returned code is 75 (alias
+.BR WARNING ,
+python code: os.TEMPFAIL, see 'pydoc os') and it has been "forced"
+(see option
+.B force
+below)
+.RE
+.IP - 2
+.BR force :
+Specifies how an action completion status should be considered when
+its returned code is
+.BR WARNING =75.
+Valid values are:
+.RS 4
+.IP * 2
+.BR allowed :
+the action is considered successful if option
+.B \-\-Force
+has been given on ISE command line. Otherwise, action is considered
+failed.
+.IP * 2
+.BR always :
+the action is always considered successful whether option
+.B \-\-Force
+is present on the commande line or not.
+.IP * 2
+.BR never :
+the action is never considered successful whether option
+.B \-\-Force
+is present on the commande line or not.
+.RE
+.TP
+.B Sequence:
+defined by the
+.B <seq>
+tag. It specifies a set of instructions (hence, one of
+.BR Action ", " Sequence " or " Parallel )
+that must be executed in the given order. This defines implicit
+dependencies between instructions.
+
+.TP
+.B Parallel:
+defined by the
+.B <par>
+tag. It specifies a set of instructions (hence one
+of
+.BR Action ", " Sequence " or " Parallel )
+that can be executed in any order. This explicitly defines that there
+is no dependency between each instruction. The ISE is free to execute
+them in parallel. Note that the ISE may or may not execute those
+instructions in parallel. This is not a requirement for the successful
+completion of parallel instructions.
+
+.SH EXAMPLES
+The clmsequencer package provides some examples at the following location:
+/usr/share/doc/clmsequencer/
+.SH "SEE ALSO"
+.BR clmsequencer (1)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

@@ -1,0 +1,323 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH depmake 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer depmake \- Create the dependency graph for the components
+specified and for a given ruleset.
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B depmake
+[action_options]
+.I ruleset components_list
+.SH DESCRIPTION
+The
+.B depmake
+action invokes the Dependency Graph Maker (DGM) which is the first
+stage of the
+.BR clmsequencer (1).
+For the
+.I components_list
+specified, it creates the dependency graph from the given
+.I ruleset. The
+resulting dependency graph is usually given to the Instructions
+Sequence Maker (ISM)
+.BR seqmake (1)
+to obtain the instruction sequence ready to be executed by the
+Instructions Sequence Executor (ISE)
+.BR seqmake (1).
+
+The given
+.I components_list
+should have the following format:
+.LP
+.B component_name[range][#type][@category]
+
+See
+.BR clmguesser (1)
+for details on this notation.
+
+The given
+.I ruleset
+is fetched from the dependency table. The
+.BR dgmdb (1)
+commands may be used to manage entries in this table. An entry is a
+.B rule
+with the following fields (defined by a column with the same name in
+the dependency table):
+.TP
+.B ruleset:
+The ruleset name for a rule;
+
+.TP
+.B name:
+The rule name;
+.TP
+.B types:
+The component types the rule should be applied to. A type is specified
+using the full name (that is, the category must be specified). Multiple
+types should be separated by a comma as in 'compute@node,io@node'. The
+special string
+.B ALL
+acts like a joker: 'ALL@node' means any component from table node
+matches, while 'ALL@ALL' means any component matches, and is
+equivalent to 'ALL' alone.
+.TP
+.B filter:
+An expression of the following two forms:
+
+.EX
+%var =~ regexp
+.br
+%var !~ regexp
+.EE
+
+where %var is a variable that will be replaced by its value on
+execution (see section
+.B VARIABLES SUBSTITUTION
+for the list of available variables). The operator '=~' means that
+component will get filtered in only if a match occurs while '!~' means
+that the component will get filtered in only if a match does not
+occur.
+
+If the expression does not start with a known %var then, the
+expression is interpreted as a (shell) command that when called
+specifies if the given component should be filtered in (returned code
+is 0) or out (returned code is different than 0).
+
+Variables will also get replaced before command execution, if
+specified.
+
+As an example, to filter out any component which name starts with the
+string 'bullx104' use:
+
+.EX
+%name =~ ^bullx104
+.EE
+
+On the other side, to let a script decide on the component id, use
+something like:
+
+.EX
+/usr/bin/my_filter %id
+.EE
+
+Two
+special values are reserved for special meanings here:
+.RS 8
+.IP - 2
+.B ALL
+: any component is filtered in (i.e. accepted);
+.IP - 2
+.B NONE
+: any component is filtered out (i.e. refused).
+.RE
+.TP
+.B action:
+The (shell) command that should be executed for each component that
+matches the rule type (and that have been filtered in).
+
+Variables will get replaced, if specified. See section
+.B VARIABLES SUBSTITUTION
+for the list of available variables.
+
+If the action is prefixed with the '@' symbol, the given action will
+get executed on the component using an 'SSH' internal connexion
+(through clustershell API).
+.TP
+.B depsfinder:
+The (shell) command that specifies which component the current
+component depends on. The command should return the components set on
+its standard output, one component per line. A component should be of
+the following format: 'name#type@category'.
+
+Variables will get replaced, if specified. See section
+.B VARIABLES SUBSTITUTION
+for the list of available variables.
+
+When set to
+.BR NONE ,
+rule names specified in the
+.B dependson
+column are simply ignored.
+.TP
+.B dependson:
+A comma-separated list of rule names, this rule depends on. For each
+dependency returned by the depsfinder, the sequencer looks if the
+dependency type matches one of the rule type specified by this
+field. If such a match occurs, the rule is applied on the dependency.
+
+When set to
+.BR NONE ,
+the script specified in the
+.B depsfinder
+column is simply ignored.
+.TP
+.B comments:
+Free form comment.
+
+.P
+The dependency graph is constructed as follow: the given
+.I components_list
+is turned into a components set (no duplication) of the following
+form: (..., component_i#type_j@category_p, ...).
+
+For each such component, a node in the graph is created. The sequencer
+then looks after a matching in the set of known types (see
+.BR knowntypes (1)).
+Basically, the rule should be a potential root in the graph rules (see
+.BR graphrules (1)),
+and both rule.type and rule.filter should match. If a match occurs,
+each rule given in the set of known types for the given matching is
+applied to the component.
+
+Applying a rule on a component is done as follow: first, the
+rule.depsfinder is called. For each component returned (of the
+form 'name#type@category'), a node in the graph is created, and an
+edge is created from the original component to the dependency.
+
+Then, the sequencer checks if one of the rules specified by
+rule.dependson matches a dependency. If such a match occurs, the
+matching rule is applied to the dependency. When all dependencies
+returned by the rule.depsfinder have been handled, the action
+specified by rule.action is added as a node attribute for the current
+component.
+
+Note that a rule's action is applied at most one time to a given
+component.
+
+The resulting graph is written out as an XML document. This document
+follows the format described in
+.BR seqmake (5).
+
+.SH VARIABLES SUBSTITUTION
+Several variables can be specified in rule.filter, rule.action and
+rule.depsfinder fields. Those variables are listed below:
+.IP - 2
+.B %id
+This variable will be replaced by a string representing the component
+of the form: component_name#type@category.
+.IP - 2
+.B %name
+this variable will be replaced by the name of the component.
+.IP - 2
+.B %type
+this variable will be replaced by the type of the component.
+.IP - 2
+.B %category
+this variable will be replaced by the category of the component.
+.IP - 2
+.B %ruleset
+this variable will be replaced by the ruleset name.
+.IP - 2
+.B %rulename
+this variable will be replaced by the rule name.
+.SH OPTIONS
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.BI \-o " FILE"
+.TQ
+.BI \-\-out= FILE
+Write out the XML document in the given
+.I FILE instead of standard output.
+.TP
+.BI \-\-depgraphto= "FILE"
+Write the dependency graph in DOT format to the given
+.I FILE. Graphviz
+.BR dotty (1)
+command can be used for its visualisation for example.
+.TP
+.BI \-F " RULE_LIST"
+.TQ
+.BI \-\-Force= RULE_LIST
+.br
+Specify the force mode
+.RB ( allowed ", "always " or " never )
+that should be used for the execution of each action related to the
+given comma separated list of rule names. When prefixed by '^', action
+execution will
+.B never
+be forced. Otherwise, it will
+.B always
+be forced. Action related to a rule that is not specified in the list
+will see its force mode set to
+.B allowed
+meaning that the decision is left to the Instruction Sequence Executor
+(see
+.BR seqexec (1))
+.TP
+.BR \-\-docache= [ yes | no ]
+.br
+Use a cache for filtering decision.
+
+.SH EXIT STATUS
+.TP
+.B 0
+if OK,
+.TP
+.B n > 0
+if something went wrong.
+
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+
+.TP
+.B CONFDIR/*.rs
+Ruleset files. See
+.BR clmsequencer (1)
+
+.SH EXAMPLE
+
+Standard execution: apply rules from 'stop' ruleset for components
+bullx-100, bullx-101, ..., bullx-200 (from the table node in the
+clusterdb) and components RACK1 and RACK2 (the category is unset, the
+component type will be guessed by the sequencer).
+.RS 4
+.EX
+$ clmsequencer depmake stop bullx-[100-200]@node RACK[1-2]
+.EE
+.RE
+
+Same thing but be verbose and output the result to /tmp/stop.depmake.xml
+.RS 4
+.EX
+$ clmsequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
+               -o /tmp/stop.depmake.xml
+.EE
+.RE
+
+Same thing but generate also a DOT format graph in /tmp/stop.graph.dot.
+.RS 4
+.EX
+$ clmsequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
+               -o /tmp/stop.depmake.xml \\
+               --depgraphto=/tmp/stop.graph.dot
+.EE
+.RE
+.SH "SEE ALSO"
+.BR clmsequencer (1)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+

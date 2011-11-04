@@ -1,0 +1,260 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH seqexec 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer seqexec \- Execute the sequence of instructions given.
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B seqexec
+[action_options]
+.SH DESCRIPTION
+The
+.B seqexec
+action invokes the Instructions Sequence Executor (ISE), the third
+stage of the
+.BR clmsequencer (1).
+It is used for the actual execution of a sequence of instructions that
+is usually computed by
+.BR seqmake (1).
+A sequence of instructions is an XML file that follows the XSD
+Schema installed at
+.B clmsequencer/ise/ise.xsd
+relative to your Python library directory (usually at
+/usr/lib/python2.6/site-packages).
+
+If, an action specified in the given instructions sequence exits with:
+.TP
+.B OK = 0
+next dependent instructions are executed normally;
+.TP
+.B WARNING = 75
+next dependent instructions are not
+executed unless action XML
+.B force
+attribute is
+.B always
+or unless option
+.B \-\-Force
+is specified and action XML
+.B force
+attribute is
+.B allowed;
+.TP
+.B ERROR = ( code != OK AND code != WARNING )
+next dependent instructions are not
+executed.
+.SH OPTIONS
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.BI \-f " FILE"
+.TQ
+.BI \-\-file= FILE
+Use the instructions sequence given in input
+.I FILE
+instead of stdin.
+.TP
+.B \-F
+.TQ
+.B \-\-Force
+Do not stop the execution of an action when one of its dependencies
+exits with a
+.B WARNING
+error code. This applies only to dependencies with a
+.B force
+XML attribute
+set to
+.BR allowed .
+Which is the default. Other attributes are
+.B always
+and
+.BR never .
+See
+.BR seqexec (5)
+for details on the
+.B force
+action attribute.
+.TP
+.BI \-\-actionsgraphto= FILE
+Write the dependency graph computed from the input instuctions
+sequence to the given output
+.IR FILE .
+The output file is in DOT format. (Graphviz
+.BR dotty (1)
+command can be used for its visualisation for example).
+.TP
+.B \-\-progress=n
+Display a progress report every
+.I n
+seconds (roughly).
+.TP
+.BR \-\-doexec= [ yes | no ]
+If
+.BR no ,
+do not execute anything. This is often used with
+.B \-\-report model
+and/or
+.B \-\-actionsgraphto
+options in order to watch what will be done before the actual
+execution.
+.TP
+.BI \-\-report= TYPE
+Display the corresponding report
+.IR TYPE .
+.I TYPE
+can be one of:
+.RS
+.IP - 2
+.BR none :
+do not display any report.
+.IP - 2
+.BR model :
+for each action specified in the input file, display its
+id, component set, description, and dependencies (Deps).
+.IP - 2
+.BR exec :
+for each executed action, display its id, submitted time, started
+time, ended time, duration, returned code and component set
+.IP - 2
+.BR error :
+for each executed action that exited with the
+.B ERROR
+code or with the
+.B WARNING
+code (unless
+.B \-\-Force
+option has been specified), display its id, returned code and reverse
+dependencies.
+.IP - 2
+.BR unexec :
+for each action that has not been executed, display its id, number of
+dependencies and missing dependencies. A missing dependency is a
+dependency that prevented an action from being executed (either
+because it did not complete succesfully, or because it has not been
+executed at all).
+.IP - 2
+.BR all :
+display all reports, in that order: model, exec, error, unexec
+.RE
+.TP
+.BR \-\-dostats =[ yes | no ]
+If
+.BR yes ,
+Display statistics and the overall exit code.
+.TP
+.BI \-\-fanout= n
+Launch a maximum of
+.I n
+actions in parallel. Increasing the hard limits of 'nproc'
+and/or 'nofile' may be required if the value given is too high (See
+.BR getrlimit (2)
+and
+.BR ulimit (1)
+for details). On average, each action (a fork) requires a minimum of 3
+file descriptors. Therefore, for a given fanout
+.IR n ,
+the 'nofile' hard limit should be set to 'c+n*(3+d)' where 'c' is the
+number of file descriptors required for the execution of the ISE stage
+with no actions, and 'd' is the maximum number of supplementary file
+descriptors required by any action. When in doubt, selecting 'c=80'
+and 'd=2', might give a good upper reasonable hard 'nofile' limit. The
+sequencer sets 'nofile' and 'nproc' soft limits to their hard limit
+before proceeding.
+.SH EXIT STATUS
+.TP
+.B 0
+if OK,
+.TP
+.B n > 0
+otherwise, if some actions did not complete successfully. The actual
+code is taken from the set of executed actions. It is the WARNING code
+unless an executed action returned something different than OK or
+WARNING.
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+.TP
+.B clmsequencer/ise/ise.xsd
+the
+.BR seqexec (5)
+input XML schema.
+.SH EXAMPLE
+Standard execution
+.RS 4
+.EX
+$ cat input.ise.xml | clmsequencer seqexec
+.EE
+.RE
+Use a file directly instead of piping to standard input
+.RS 4
+.EX
+$ clmsequencer seqexec -f input.ise.xml
+.EE
+.RE
+Same thing with progress report of 1 second
+.RS 4
+.EX
+$ clmsequencer seqexec -f input.ise.xml \\
+                --progress 1
+.EE
+.RE
+Provide some statistics
+.RS 4
+.EX
+$ clmsequencer seqexec -f input.ise.xml \\
+                --dostats=yes
+.EE
+.RE
+Error report only
+.RS 4
+.EX
+$ clmsequencer seqexec -f input.ise.xml \\
+                --report error
+.EE
+.RE
+Be verbose, report all including statistics
+.RS 4
+.EX
+$ clmsequencer -v seqexec -f input.ise.xml \\
+                --report all \\
+                --dostats=yes
+.EE
+.RE
+Do not execute but output the actions dependency graph to /tmp/ise.dot,
+and provide a model report
+.RS 4
+.EX
+$ clmsequencer -v seqexec -f input.ise.xml \\
+                --doexec=on \\
+                --actionsgraphto=/tmp/ise.dot \\
+                --report model
+.EE
+.RE
+.SH "SEE ALSO"
+.SS "Sequencer"
+.BR clmsequencer (1)
+.SS "Sequencer ISE Input Formats"
+.BR seqexec (5)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

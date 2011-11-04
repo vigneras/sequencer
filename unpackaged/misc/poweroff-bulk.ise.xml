@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- 
+   $Id: poweroff-bulk.ise.xml,v 1.1 2011/02/15 10:24:48 vigneras Exp $
+
+   This example *does* produce a side effect on the cluster: it powers off some nodes!
+   It does the following:
+   powers off some nodes in some order.
+   
+  -->
+
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+
+  <!-- Each desc will be used for logging when the verbose option is
+  passed to the ISE.  -->
+  <par desc="All stuff can be performed in parallel">
+    <seq>
+      <action id="113-114" desc="%path: powering off %component" component_set="miranda[113-114]#compute">
+        clusterctrl --verbose --Force poweroff miranda[113-114]
+      </action>
+      <action id="115-116" desc="%path: powering off %component" component_set="miranda[115-116]#compute">
+        clusterctrl --verbose --Force poweroff miranda[115-116]
+      </action>
+    </seq>
+    <action id="117p" desc="%path: powering off %component" component_set="miranda117#compute">
+      clusterctrl --verbose --Force poweroff miranda117
+    </action>
+  </par>
+</instructions>

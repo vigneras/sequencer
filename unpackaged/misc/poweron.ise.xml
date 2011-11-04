@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- 
+   $Id: poweron.ise.xml,v 1.1 2011/02/15 10:24:48 vigneras Exp $
+
+   This example *does* produce a side effect on the cluster: it powers on some nodes!
+   It does the following:
+   powers one some nodes in some order.
+   
+  -->
+
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+
+  <!-- Each desc will be used for logging when the verbose option is
+  passed to the ISE.  -->
+  <par desc="All stuff can be performed in parallel">
+    <seq desc="PowerOn: miranda113 -> miranda114">
+      <action id="113p" desc="%path: powering on %component" component_set="miranda113#compute">
+        clusterctrl --Force poweron miranda113
+      </action>
+      <action id="114p" desc="%path: powering off %component" component_set="miranda114#compute">
+        clusterctrl --Force poweron miranda114
+      </action>
+    </seq>
+
+    <seq desc="PowerOn miranda115|miranda116">
+      <action id="115p" desc="%path: powering on %component" component_set="miranda115#compute">
+        clusterctrl --Force poweron miranda115
+      </action>
+      <action id="116p" desc="%path: powering on %component" component_set="miranda116#compute">
+        clusterctrl --Force poweron miranda116
+      </action>
+    </seq>
+
+    <action id="117p" desc="%path: powering on %component" component_set="miranda117#compute">
+        clusterctrl --Force poweron miranda117
+    </action>
+
+  </par>
+</instructions>

@@ -1,0 +1,91 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH graphrules 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer graphrules \- produce a DOT format graph representing the
+dependencies between rules of a given ruleset.
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B graphrules
+[action_options]
+.I ruleset
+.SH DESCRIPTION
+This action produces a graph in the DOT format language (see
+.BR graphviz (7))
+where a vertice in the graph represents a rule in the given ruleset,
+and an edge represents a dependency as expressed by the
+rule's
+.B dependson
+field (see rule content description in
+.BR depmake (1)).
+
+.SH OPTIONS
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.BI \-o " FILE"
+.TQ
+.BI \-\-out= FILE
+Write out the DOT format graph to the given
+.I FILE
+instead of standard output.  Graphviz
+.BR dotty (1)
+command can be used for its visualisation for example.
+
+.SH EXIT STATUS
+.TP
+.B 0
+if OK,
+.TP
+.B n > 0
+if something went wrong.
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+.TP
+.B CONFDIR/*.rs
+Ruleset files. See
+.BR clmsequencer (1)
+.SH EXAMPLE
+
+Graph rules for the 'stop' ruleset
+.RS 4
+.EX
+$ clmsequencer graphrules stop
+.EE
+.RE
+
+Same thing but write out the result to the /tmp/stop.graph.dot
+.RS 4
+.EX
+$ clmsequencer graphrules stop -o /tmp/stop.graph.dot
+.EE
+.RE
+
+.SH "SEE ALSO"
+.SS "Sequencer"
+.BR clmsequencer (1)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+

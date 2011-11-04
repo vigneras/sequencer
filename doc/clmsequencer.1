@@ -1,0 +1,354 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH clmsequencer 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer \- Compute and execute a sequence of dependent
+instructions for a set of hardware and software components.
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B <action>
+[action_options]
+.B <action_param>
+
+<action>:
+.B chain
+|
+.B dbadd
+|
+.B dbchecksum
+|
+.B dbcopy
+|
+.B dbcreate
+|
+.B dbdrop
+|
+.B dbremove
+|
+.B dbshow
+|
+.B dbupdate
+|
+.B depmake
+|
+.B graphrules
+|
+.B knowntypes
+|
+.B seqexec
+|
+.B seqmake
+|
+.B <ruleset>
+
+.SH DESCRIPTION
+.B clmsequencer
+is used to compute and execute a sequence of dependent instructions
+for a set of hardware and software components.
+
+A
+.B dependency table
+is defined into a
+.B configuration directory.
+This table describes the ordering between actions: is is a simple list
+of
+.B rules
+(one rule per row). A rule basically describes which action should be
+applied on which component and after which other rules in the table
+(see
+.BR depmake (1)
+for details on rule content). Rules are grouped into a
+.B ruleset.
+A ruleset is seen by the end user as a simple sequencer action thanks
+to the
+.B chaining
+feature. For example, a ruleset 'stop' might define how to stop a
+whole rack. It contains several rules, one for each kind of
+components. From the end-user perspective, the 'stop' ruleset is just
+an action that can be given to the sequencer for stopping her racks
+like in the following command:
+
+.RS 8
+.EX
+# clmsequencer stop rack[1-10]
+.EE
+.RE
+
+From the given ruleset ('stop' here), the sequencer fetches all rules,
+computes the dependency graph, creates an instructions sequence and
+finally executes the corresponding set of actions.
+
+Rulesets are usually grouped into specific commands using symbolic
+links to the clmsequencer command. For example, defining a new group
+of rulesets is done by linking the clmsequencer command to a new
+command name, say, 'newcmd', using that new command name to create
+rulesets, and finally executing actions with this new command as in
+the following example:
+
+.RS 8
+.EX
+# ln -s $(which clmsequencer) /usr/sbin/newcmd
+# /usr/sbin/newcmd dbcreate
+# /usr/sbin/newcmd dbadd stop rule1 ....
+# /usr/sbin/newcmd dbadd stop rule2 ....
+# /usr/sbin/newcmd stop rack[1-10]
+.EE
+.RE
+
+Therefore, a command defines several rulesets. A ruleset defines
+several rules. A rule defines an action, on which component this
+action should be applied to, and on which other rules it depends
+on. Finally, an action is just a standard UNIX executable along with
+its options and parameters.
+
+
+.SH ACTIONS
+The clmsequencer understand the following actions:
+
+.TP
+.B - graphrules
+Produce a DOT format graph representing dependencies between rules of
+a given ruleset -- see
+.BR graphrules (1).
+.TP
+.B - knowntypes
+Display the types known by the given
+ruleset along with starting rules that will be applied on them for the
+computation of the dependency graph. -- see
+.BR knowntypes (1).
+.TP
+.B - depmake
+Invoke the Dependency Graph Maker (DGM) -- see
+.BR depmake (1)
+-- that computes the dependency graph from the dependency table.
+.TP
+.B - seqmake
+invoke the Instructions Sequence Maker (ISM) -- see
+.BR seqmake (1)
+-- that computes the sequence of instructions that should be executed
+conforming to the constraints expressed in the given dependency graph.
+.TP
+.B - seqexec
+invoke the Instructions Sequence Executor (ISE) -- see
+.BR seqexec (1)
+-- that executes the given sequence of instructions taking error into
+account and using parallelism (where possible).
+.TP
+.BI "- [chain]" " ruleset"
+chain all stages -- see
+.BR chain(1)
+.br
+The action name
+.B chain
+is not required: if the given
+.I ruleset
+does not conflict with one of the known clmsequencer actions listed above,
+.B chain
+is automatically selected.
+.br
+Action
+.B chain
+is roughly equivalent to:
+.RS 8
+
+.EX
+$ clmsequencer depmake ruleset <components...> |\\
+  clmsequencer seqmake | \\
+  clmsequencer seqexec
+.EE
+.RE
+
+.SH OPTIONS
+There are two levels of options for the clmsequencer:
+.IP - 2
+.B Global Options:
+are specified before the action
+.IP - 2
+.B Action Options:
+are specified after the action
+
+This section describes
+.B Global Options
+only.
+
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.B \-V
+.TQ
+.B \-\-Version
+Display name, version and copyright.
+.TP
+.B \-v
+.TQ
+.B \-\-verbose
+Display all level messages on output except DEBUG level.
+.TP
+.B \-q
+.TQ
+.B \-\-quiet
+Display only WARNING, ERROR, CRITICAL level messages on output
+(standard error).
+.TP
+.B \-D
+.TQ
+.B \-\-Debug
+Display all level messages on output.
+.TP
+.BI -d " DIR"
+.TQ
+.BI \-\-dir= "DIR"
+.br
+Specify the configuration directory. Default:
+/etc/clmsequencer/<cmd>. where <cmd> is the current command name.
+.TP
+.BI \-b " BASE"
+.TQ
+.BI \-\-base= "BASE"
+.br
+Specify a BASE directory relative to the configuration directory where
+rulesets should be found.
+.TP
+.BI \-l " FILE" [: "LEVEL" ]
+.TQ
+.BI \-\-log= "FILE" [: "LEVEL" ]
+.br
+Log all messages above
+.I LEVEL
+to the given
+.I FILE.
+Available levels:
+.B DEBUG, INFO, OUTPUT, WARNING, ERROR, CRITICAL.
+Default to
+.B DEBUG
+if
+.I LEVEL
+is not specified.
+.RE
+
+For action options, see specific action man pages:
+.RS 4
+.IP - 2
+.BR graphrules (1),
+.IP - 2
+.BR knowntypes (1),
+.IP - 2
+.BR depmake (1),
+.IP - 2
+.BR seqmake (1),
+.IP - 2
+.BR seqexec (1),
+.IP - 2
+.BR chain (1)
+.RE
+
+or use the '--help' action option as in:
+
+.EX
+$ clmsequencer seqexec --help
+.EE
+
+.SH EXIT STATUS
+.TP
+.B 0
+if OK,
+
+.TP
+.B n > 0
+Otherwise, depending on the actual action specified.
+
+.SH FILES
+The clmsequencer fetches its data from its
+.I configuration directory
+refered to by CONFDIR in the following. By default, CONFDIR is of the
+form:
+.EX
+/etc/clmsequencer/<cmd>
+.EE
+where <cmd> is the actual command name. For example, if
+/usr/bin/seqtest is a symbolic link on /usr/sbin/clmsequencer, the
+configuration directory of the seqtest command is
+.EX
+CONFDIR=/etc/clmsequencer/seqtest
+.EE
+
+The configuration directory can also be explicitely specified using
+the
+.B --dir
+option. Moreover, if
+option
+.B --base
+is specified, data are looked into the specified
+.I subdirectory
+relatively to the configuration directory.
+
+For example with:
+
+.EX
+seqtest -d /tmp/foo
+CONFDIR=/tmp/foo
+.EE
+
+While with:
+
+.EX
+seqtest -d /tmp/foo -b bar
+CONFDIR=/tmp/foo/bar
+.EE
+
+Inside the configuration directory, the sequencer uses:
+
+.TP
+.B CONFDIR/config:
+this file contains various parameters used by the sequencer. This file
+is normally self documented through the use of comments.
+.TP
+.B CONFDIR/*.rs
+Ruleset files. A ruleset file is a standard INI file with an '.rs'
+extension. The file name gives the ruleset name. In a given file, each
+section represents a rule. In a given section, a line of the
+form 'key=value' actually represents 'rule.key=value'. The dependency
+table is thus implemented by several such ruleset files.
+.SH "SEE ALSO"
+.SS "Components List Specification"
+.BR clmguesser (1)
+.SS "Sequencer Dependency Graph Maker Database Management"
+.BR dgmdb (1)
+.SS "Sequencer Actions"
+.BR graphrules (1)
+.br
+.BR knowntypes (1)
+.br
+.BR depmake (1)
+.br
+.BR seqmake (1)
+.br
+.BR seqexec (1)
+.br
+.BR chain (1)
+.SS "Sequencer Input Formats"
+.BR seqmake (5)
+.br
+.BR seqexec (5)
+.SS "Others"
+Dependency Graph Visualisation Tool:
+.BR dotty (1)
+.br
+For the clmsequencer Python API, execute:
+.B 'pydoc clmsequencer'
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+

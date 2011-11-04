@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- 
+   $Id: sample.ise.xml,v 1.1 2011/02/15 10:24:48 vigneras Exp $
+
+   This is an example of an Instructions Sequence Executor input file.
+   
+  -->
+
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+
+  <!-- Each desc will be used for logging when the verbose option is
+  passed to the ISE.  -->
+  <seq desc="Powering off cold doors and their dependents compute nodes (a whole rack)">
+    <par desc="Powering off each rack in parallel">
+
+      <seq desc="Start powering off nodes, then cold door">
+        <par desc="Nodes can be powered off in parallel: here parallelism is handled by the framework">
+          <action id="1" desc="Acting on compute1-1" component_set="compute1-1#compute">echo "compute1-1"</action>
+          <action id="2" desc="Acting on compute1-2" component_set="compute1-2#compute">echo "compute1-2"</action>
+          <action id="3" desc="Acting on compute1-3" component_set="compute1-3#compute">echo "compute1-3"</action>
+        </par>
+        <action id="4" desc="Powering off cd1" component_set="cd1#coldoor">echo "cd1"</action>
+      </seq>
+
+      <seq desc="Here, the action is able do deal with compount components directly.">
+        <!-- Dealing with error should be specified for such action:
+        an aggregated action returns a single return code. -->
+        <action id="6" desc="Powering off compute2-[1-3]" component_set="compute2-[1-3]#compute">echo "compute2-[1-3]"</action>
+        <action id="7" desc="Powering off cd2" component_set="cd2#coldoor">echo "cd2"</action>
+      </seq>
+
+    </par>
+  </seq>
+
+</instructions>

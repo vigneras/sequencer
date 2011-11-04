@@ -1,0 +1,8 @@
+<instructions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+  <seq>
+    <action id="foo" component_set="localhost">Action1</action>
+  </seq>
+</instructions>

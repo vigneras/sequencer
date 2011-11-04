@@ -1,0 +1,40 @@
+
+WARNING: [9] Error generated!
+ERROR: [9: rc=75]: Error generated!
+[12] Sleeping for 3
+[9] Sleeping for 1
+[10] Sleeping for 2
+================================================================================
+Actions in Model: 6	Legend: @=remote, Deps=Dependencies
+              Id     [@]Component Set                              Description Deps
+              10            localhost               Should always get executed 12
+              11            localhost Should not be executed unless 'force' is 9,10
+              12            localhost               Should always get executed 
+              13            localhost Should not be executed unless 'force' is 9
+              14            localhost Should not be executed unless 'force' is 13,12
+               9            localhost Returning WARNING is considered an error 
+
+
+
+Executed Actions: 3 (50.0 %)	Legend: @=remote, RC=Returned Code
+              Id   Submitted Time     Started Time       Ended Time                 Duration  RC [@]Component Set
+              12  13:39:49.778710  13:39:49.781247  13:39:52.784164           0:00:03.002917   0 localhost
+               9  13:39:49.778934  13:39:49.783127  13:39:50.785740           0:00:01.002613  75 localhost
+              10  13:39:52.784243  13:39:52.785495  13:39:54.789134           0:00:02.003639   0 localhost
+
+
+
+Errors: 1 (16.7 %)	Legend: rDeps=reverse dependencies, RC=returned code
+              Id  RC #rDeps  %rDeps rDeps
+               9  75      2    33.3 11, 13
+
+
+
+Unexecuted Actions: 3 (50.0 %)	Legend: mDeps=missing (error or unexecuted) dependencies
+              Id  #Deps #mDeps  %mDeps mDeps
+              11      2      1    50.0 9
+              13      1      1   100.0 9
+              14      2      1    50.0 13
+
+
+
