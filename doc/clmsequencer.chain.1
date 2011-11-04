@@ -1,0 +1,258 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH chain 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer chain \- Compute the dependency graph, create the
+instruction sequence and then execute it directly.
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.RB [ chain ]
+.I ruleset
+[action_options]
+.I components_list
+.SH DESCRIPTION
+The
+.B chain
+clmsequencer command transparently executes
+.BR depmake (1),
+.BR seqmake (1)
+and
+.BR seqexec (1)
+in a way that is roughly equivalent to the following shell commands:
+
+.RS 4
+.EX
+# clmsequencer depmake <ruleset> components_list |\\
+  clmsequencer seqmake | \\
+  clmsequencer seqexec
+.EE
+.RE
+
+This enables the direct execution of actions taken from the dependency
+graph computed from the given
+.I ruleset
+and the given
+.I components_list.
+
+Note that the action name
+.B chain
+is not required if the
+.I ruleset
+name does not conflict with any clmsequencer action (see
+.BR clmsequencer (1)
+for the list of actions). Therefore, the following commands:
+
+.RS 4
+.EX
+# clmsequencer chain stop bullx[3-10]
+# clmsequencer stop bullx[3-10]
+.EE
+.RE
+
+are equivalents. In such a case, the ruleset name 'stop' is called an
+action shortcut. The list of available shortcuts is listed by the
+sequencer when no arguments are provided. You may also use the
+.B dbshow
+action to fetch a more detailed list (see
+.BR dgmdb (1)).
+
+The given
+.I components_list
+should conform to the components list specification described in
+.BR clmguesser (1).
+
+.SH OPTIONS
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.BI -F " RULE_LIST"
+.TQ
+.BI --Force= RULE_LIST
+Specify the comma-separated list of rules for which related action
+should be forced. That is, if an action, 'A', returns a code
+.BR WARNING =75
+and if 'A' comes from a rule present in the given
+.I RULE_LIST
+then, the execution will continue for each action that depends on 'A' as if the returned code of 'A' was
+.BR OK =0.
+See
+.BR seqexec (1)
+for details on forcing.
+.TP
+.BI \-\-depgraphto= FILE
+Write the components dependency graph (computed by DGM, i.e. the
+.BR depmake (1)
+action), in DOT format to the given
+.IR FILE .
+Use the Graphviz
+.BR dotty (1)
+command to visualize the graph.
+.TP
+.BI \-\-actionsgraphto= FILE
+Write the action dependency graph (computed by ISE, i.e. the
+.BR seqexec (1)
+action) in DOT format to the given
+.IR FILE .
+Use Graphviz
+.BR dotty (1)
+command to visualize the graph.
+.TP
+.BI \-\-progress= n
+Display a progress report every
+.I n
+seconds (roughly).
+.TP
+.BR \-\-doexec= [ yes | no ]
+If
+.BR no ,
+do not execute anything. This is often used with
+.B \-\-report model
+and/or
+.B \-\-actionsgraphto
+options in order to watch what will be done before the actual
+execution.
+.TP
+.BI \-\-algo= ALGO
+Use the specified sequence maker algorithm. Can be one of:
+.BR mixed ,
+.BR optimal ,
+.BR par ,
+.BR seq .
+See
+.BR seqmake (1)
+for details.
+.TP
+.B \-\-report=TYPE
+Display a report. Can be one of:
+.BR all ,
+.BR none ,
+.BR model ,
+.BR exec ,
+.BR error ,
+.BR unexec .
+See
+.BR seqexec (1)
+for details about report types.
+.TP
+.BR \-\-dostats =[ yes | no ]
+If
+.BR yes ,
+Display statistics and the overall exit code.
+.TP
+.BI \-\-fanout= n
+Launch a maximum of
+.I n
+actions in parallel. See
+.BR seqexec (1)
+for details about fanout, in particular section on 'nproc' and 'nofile'
+hard limits.
+.TP
+.BR \-\-docache= [ yes | no ]
+.br
+Use a cache for filtering decision.
+.SH EXIT STATUS
+.TP
+.B 0
+If OK,
+.TP
+.B n > 0
+If something went wrong in the two first stages
+.RB ( depmake (1)
+and
+.BR seqmake (1))
+or if some actions did not complete successfully in the last stage
+.RB ( seqexec (1)).
+In the last case, the code returned is the one specified by
+.BR seqexec (1)
+action.
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+.TP
+.B CONFDIR/*.rs
+Ruleset files. See
+.BR clmsequencer (1)
+.TP
+.B clmsequencer/ise/ise.xsd
+The
+.BR seqexec (5)
+input XML schema.
+.SH EXAMPLE
+Suppose that a 'stop' ruleset is defined in the dependency table to
+stop various clusters components (hardware and software).
+
+To stop all (hardware) components from RACK-2 and RACK-3 and NFS
+(software) servers that runs on nodes io-2 up to io-5:
+
+.RS 4
+.EX
+# clmsequencer stop RACK-[2-3] io-[2-5]#nfs@soft
+.EE
+.RE
+
+The same command with a progress report of 1 second
+.RS 4
+.EX
+# clmsequencer stop RACK-[2-3] io-[2-5]#nfs@soft \\
+               --progress=1
+.EE
+.RE
+
+Use the verbose option, report everything including statistics
+.RS 4
+.EX
+# clmsequencer --verbose stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+               --report=all \\
+               --dostats=yes
+.EE
+.RE
+
+Use the 'seq' algorithm instead of default 'optimal'. This will execute
+instructions sequentially.
+.RS 4
+.EX
+# clmsequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+                --algo=seq
+.EE
+.RE
+
+Do not execute, but produces both components dependency graph and
+actions dependency graphs for manual checking.
+.RS 4
+.EX
+# clmsequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+                --doexec=no \\
+                --depgraphto=/tmp/depgraph.dot \\
+                --actionsgraphto=/tmp/actionsgraph.dot
+.EE
+.RE
+
+.SH "SEE ALSO"
+.SS "Sequencer"
+.BR clmsequencer (1)
+.SS "Sequencer ISE Input Formats"
+.BR seqexec (5)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+

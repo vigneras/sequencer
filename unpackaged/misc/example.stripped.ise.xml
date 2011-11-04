@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+    <par>
+      <seq>
+        <par>
+          <action id="9" desc="Returning WARNING is considered an error unless 'force' is 'true'">
+            n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n;echo "Error generated!" >&amp;2;exit 75'
+          </action>
+          <action id="10" desc="Should always get executed" deps="12">
+            n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n'
+          </action>
+        </par>
+        <action id="11" desc="Should not be executed unless 'force' is 'true'">
+          n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n'
+        </action>
+      </seq>
+      <seq>
+        <par>
+          <action id="12" desc="Should always get executed">
+            n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n'
+          </action>
+        <action id="13" desc="Should not be executed unless 'force' is 'true'" deps="9">
+          n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n'
+        </action>
+        </par>
+        <action id="14" desc="Should not be executed unless 'force' is 'true'">
+          n=$(( 1 + ($(od -An -N1 -i /dev/random)) % (3 - 1 + 1) ))  bash -c 'echo "Sleeping for $n";sleep $n'
+        </action>
+      </seq>
+    </par>
+</instructions>

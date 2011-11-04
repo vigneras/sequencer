@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- 
+   $Id: hello_world.seqexec.xml,v 1.1 2010/10/05 13:28:39 vigneras Exp $
+
+   The Hello World Example input file for the Instructions Sequence Executor (ISE).
+
+  -->
+
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+
+  <action id="HW" desc="The Hello World Example!">
+    echo "Hello World!"
+  </action>
+</instructions>

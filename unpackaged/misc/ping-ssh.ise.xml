@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!-- 
+   $Id: ping-ssh.ise.xml,v 1.1 2011/02/15 10:24:48 vigneras Exp $
+
+   This example does not produce any side effect on the cluster.
+   It does the following:
+   First: try to ping some nodes, only if it works, ssh to it and perform a uname -a.
+   
+  -->
+
+<instructions
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
+		       /usr/share/clmsequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+
+  <!-- Each desc will be used for logging when the verbose option is
+  passed to the ISE.  -->
+  <par desc="All stuff can be performed in parallel">
+    <seq desc="miranda-113: ping first, then ssh">
+      <action id="113p" desc="%path: pinging on %component" component_set="miranda113#compute">
+        ping -c 10 miranda113
+      </action>
+      <action id="113s" desc="%path: ssh on %component" component_set="miranda113#compute">
+        ssh miranda113 uname -a
+      </action>
+    </seq>
+
+    <seq desc="miranda-114: ping first, then ssh">
+      <action id="114p" desc="%path: pinging on %component" component_set="miranda114#compute">
+        ping -c 5 miranda114
+      </action>
+      <action id="114s" desc="%path: ssh on %component" component_set="miranda114#compute">
+        ssh miranda114 'uname -a;sleep 5'
+      </action>
+    </seq>
+
+    <seq desc="miranda-115: ping first, then ssh">
+      <action id="115p" desc="%path: pinging on %component" component_set="miranda115#compute">
+        ping -c 3 miranda115
+      </action>
+      <action id="115s" desc="%path: ssh on %component" component_set="miranda115#compute">
+        ssh miranda115 'uname -a;sleep 3'
+      </action>
+    </seq>
+
+    <seq desc="miranda-116: ping first, then ssh">
+      <action id="116p" desc="%path: pinging on %component" component_set="miranda116#compute">
+        ping -c 1 miranda116
+      </action>
+      <action id="116s" desc="%path: ssh on %component" component_set="miranda116#compute">
+        ssh miranda116 uname -a
+      </action>
+    </seq>
+
+  </par>
+</instructions>

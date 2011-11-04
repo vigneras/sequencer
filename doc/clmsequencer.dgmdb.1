@@ -1,0 +1,270 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH clmsequencer.dgmdb 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer db* \- Sequencer Dependency Graph Maker Database Management
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B action
+[action_options]
+.SH DESCRIPTION
+.B clmsequencer
+is used to manage the
+.B sequencer
+dependency table (also known as the dependency graph maker
+database). See
+.BR depmake (1)
+for details regarding the sequencer table columns name and meaning.
+
+There are two option levels for
+.BR clmsequencer :
+
+.RS 4
+.IP - 2
+Global Options:
+are specified before the action (see
+.BR clmsequencer (1)
+for details.)
+.IP - 2
+Action Options:
+are specified after the action.
+.RE
+.SH ACTIONS
+The clmsequencer command understand the following actions:
+.TP 11
+.B dbcreate
+Create the sequencer table. There are no option. This basically
+creates the configuration directory (normally inside
+/etc/clmsequencer/<cmd> where <cmd> is the command name).
+.TP
+.B dbdrop
+.RB [ --Enforce ]
+.br
+Drop the sequencer table. Use with care. Option
+.B \-\-Enforce
+can be used to prevent the confirmation. This action does remove
+all rulesets from the configuration directory.
+.TP
+.BR dbshow
+[
+.BI --columns= COLUMNS_LIST
+][
+.IR ruleset ]
+.br
+Display the sequencer table (only for the given
+.I ruleset,
+if specified). If option
+.B --columns
+is provided,
+.I COLUMNS_LIST
+should be a comma separated list of
+.I column[:max]
+where
+.I column
+is a column label, and
+.I max
+is a positive integer. The table is displayed using the specified
+maximum number of character for the related columns (0 means remove
+the column completely).  Note:
+.I max
+should be greater than 6. If
+.I max is not given at all, then only
+specified columns are displayed. For example:
+
+.EX
+--columns=filter:0,action:15,name
+.EE
+
+displays only columns 'name' and 'action'. This last column is only
+displayed with 15 maximum characters. See
+.BR depmake (1)
+for rule details.
+.TP
+.B dbadd
+.I ruleset name types filter action depsfinder dependson comments
+.br
+Add a rule to the sequencer table. Multiple
+.I types
+can be specified using the comma separator ','. Multiple
+.I dependson
+can be specified using the comma separator ','. Both
+.I action
+and
+.I depsfinder
+should be a valid shell command line. Quotes must be used to prevent
+misinterpretation by the shell. Value
+.B NONE
+is only legal for 'action', 'depsfinder' and 'dependson'. See
+.BR depmake (1)
+for rule details.
+
+.TP
+.B dbremove
+[
+.B --nodeps
+][
+.B --Enforce
+]
+.IR ruleset " [" rulename \.\.\.]
+.br
+Remove all the (given) rules from the sequencer table. Use with
+care. Option
+.B \-\-Enforce
+can be used to prevent the confirmation. Any reference to the given
+rulename in the dependson column will be removed unless option
+.B \-\-nodeps
+is given.
+
+.TP
+.B
+dbupdate
+[
+.B --nodeps
+]
+.I ruleset rulename col1=val1 col2=val2
+.br
+Update columns
+.I col1, col2, ...
+of the given rule
+(
+.IR ruleset ,
+.IR rulename )
+with values
+.I val1, val2, ...
+respectively in the sequencer table. When the column
+.B name
+is present in the parameter, any reference to the given rulename in
+the
+.B dependson
+column will be updated accordingly unless option
+.B \-\-nodeps
+is given. See
+.BR depmake (1)
+for rule details.
+
+.TP
+.B dbchecksum
+[
+.I ruleset
+]
+.br
+Compute the checksum for each rule of the given
+.I ruleset
+(all if unspecified) and of the
+.I ruleset
+itself (all if unspecified)
+
+.SH EXIT STATUS
+.TP
+.B 0
+if OK,
+
+.TP
+.B n > 0
+otherwise.
+
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+
+.TP
+.B CONFDIR/*.rs
+Ruleset files. See
+.BR clmsequencer (1)
+
+.SH EXAMPLE
+Create a new command for storing rulesets:
+.RS 4
+.EX
+# ln -s $(which clmsequencer) seqtest
+.EE
+.RE
+Create the dependency table for this command:
+.RS 4
+.EX
+# seqtest dbcreate
+.EE
+.RE
+
+Add two rules named 'cd-off' and 'node-off' in a 'stop' ruleset.
+.RS 4
+.EX
+# seqtest dbadd 'stop' 'cd-off' 'coldoor' ALL \\
+        'nodectrl -F poweroff_force %name \\
+        '/bin/find-cd-deps' 'node-off' "PowerOff Colddoor"
+# seqtest dbadd 'stop' 'node-off' 'compute|login' NONE \\
+        'nodectrl -F poweroff %name' \\
+        NONE NONE "PowerOff nodes"
+.EE
+.RE
+
+Display the sequencer table content:
+.RS 4
+.EX
+# seqtest dbshow
+.EE
+.RE
+
+Update the 'node-off' rule so filter becomes ALL instead of NONE.
+.RS 4
+.EX
+# seqtest dbupdate 'stop' 'node-off' filter=NONE
+.EE
+.RE
+
+Compute the checksum of ruleset 'stop'.
+.RS 4
+.EX
+# seqtest dbchecksum stop
+.EE
+.RE
+
+Compute the checksum of each ruleset.
+.RS 4
+.EX
+# seqtest dbchecksum
+.EE
+.RE
+
+Remove the 'cd-off' rule without confirmation
+.RS 4
+.EX
+# seqtest -E dbremove 'stop' 'cd-off'
+.EE
+.RE
+
+Remove the whole 'stop' ruleset without confirmation
+.RS 4
+.EX
+# seqtest -E dbremove 'stop'
+.EE
+.RE
+
+Drop the sequencer table completely. A confirmation will be asked.
+.RS 4
+.EX
+$ seqtest -E dbdrop
+.EE
+.RE
+.SH "SEE ALSO"
+.BR clmsequencer (1)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.

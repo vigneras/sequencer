@@ -1,0 +1,168 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH seqmake 1 "August 2010" bullx "Sequencer Manual"
+.SH NAME
+clmsequencer seqmake \- Compute an instructions sequence from a dependency graph.
+
+.SH SYNOPSIS
+.B clmsequencer
+[global_options]
+.B seqmake
+[action_options]
+.SH DESCRIPTION
+The
+.B seqmake
+action invokes the Instructions Sequence Maker (ISM), the second stage
+of the
+.BR clmsequencer (1).
+It reads a dependency graph from its standard input (by default) and
+returns a sequence of instructions on its standard output (by
+default). The dependency graph is an XML document that has usually been
+produced by
+.BR depmake (1).
+The computed sequence of instructions is also an XML document that
+is usually given as an input to
+.BR seqmake (1)
+for execution.
+
+Several algorithms are available for the generation of the
+instructions sequence. The produced sequence respects dependency
+constraints expressed in the input dependency graph. For a given
+dependency graph, each algorithm outputs a different instructions
+sequence. The variation relies only in performance of execution and/or
+readability of dependencies in the XML output document.
+
+See the Instructions Sequence Executor document format
+.BR seqmake (5)
+for details on the XML output syntax.
+
+.SH OPTIONS
+.TP
+.B \-h
+.TQ
+.B \-\-help
+show this help message and exit
+.TP
+.BI \-f " FILE"
+.TQ
+.BI \-\-file= FILE
+Use the dependency graph given in input
+.I FILE
+instead of stdin.
+.TP
+.BI \-\-algo= ALGO
+Use the given algorithm. Can be one of:
+
+.RS 8
+.IP - 2
+.B seq:
+Produces all actions into a single SEQ instruction. The resulting
+instructions sequence is therefore purely sequential: dependency is
+expressed implicitely, an action depends on its preceding one in the
+SEQ instruction. Therefore, the resulting instructions sequence is the
+least performant. However dependencies between actions are very easy
+to grasp in the output XML document.
+
+.IP - 2
+.B par:
+Produces all actions into a single PAR instruction. Dependencies
+between actions are expressed explicitely (using the action 'deps' XML
+attribute). The resulting instructions sequence is therefore as
+parallel as possible and is therefore the most performant. However
+dependencies between actions might be quite difficult to grasp in the
+output XML document.
+
+.IP - 2
+.B mixed:
+Produces a mix of SEQ and PAR instructions. This algorithm works as
+follow: it produces a PAR instructions for each set of leaves in the
+dependency graph. Those leaves are removed from the graph. The process
+is repeated until there are no more vertices in the original
+dependency graph. All generated PAR instructions are enclosed into a
+single SEQ instruction. The resulting instructions sequence is
+therefore a compromise between
+.B par
+and
+.BR seq :
+it produces a performant and readable instructions set. Performant:
+most actions are performed in parallel. Readable: dependencies are
+implicit. However, this algorithm does not scale for large dependency
+graph.
+
+.IP - 2
+.B optimal (default):
+This algorithm produces a document that is the most performant
+(equivalent to the
+.B par
+algorithm) and remains readable (most dependencies are implicit using
+SEQ instruction rather than explicit using action 'deps' attribute).
+
+.RE
+
+.TP
+.BI \-o " FILE"
+.TQ
+.BI \-\-out= FILE
+Produce the instructions sequence into the given
+.I FILE
+instead of standard output.
+
+.SH EXIT STATUS
+.TP
+.B 0
+if OK
+.TP
+.B n > 0
+if something went wrong.
+
+.SH FILES
+In the following, CONFDIR is the configuration directory. Default is
+/etc/clmsequencer/<cmd>/. See section
+.B FILES
+of
+.BR clmsequencer (1)
+for details.
+.TP
+.B CONFDIR/config
+The general sequencer configuration file. See
+.BR clmsequencer (1)
+
+.SH EXAMPLE
+Standard execution
+.RS 4
+.EX
+$ cat input.seqmake.xml | clmsequencer seqmake
+.EE
+.RE
+
+Same thing with 'par' algorithm
+.RS 4
+.EX
+$ cat input.seqmake.xml | clmsequencer seqmake --algo=par
+.EE
+.RE
+
+Read from input file and write to output file, being verbose.
+.RS 4
+.EX
+$ clmsequencer -v seqexec -f input.seqmake.xml -o output.seqmake.xml
+.EE
+.RE
+
+.SH "SEE ALSO"
+.SS "Sequencer"
+.BR clmsequencer (1)
+.SS "Sequencer ISM Input Formats"
+.BR clmsequencer.seqmake (5)
+.SH AUTHOR
+Pierre Vigneras
+.UR pierre.vigneras@\:bull.net
+.UE
+.SH "COPYRIGHT"
+Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
+later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+

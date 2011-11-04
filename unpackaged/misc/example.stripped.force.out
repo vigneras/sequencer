@@ -1,0 +1,51 @@
+
+WARNING: [9] Error generated!
+[12] Sleeping for 3
+[9] Sleeping for 1
+[13] Sleeping for 1
+[10] Sleeping for 2
+[14] Sleeping for 1
+[11] Sleeping for 3
+
+=================================== REPORTS ===================================
+Actions in Model: 6	Legend: @=remote, Deps=Dependencies
+              Id     [@]Component Set                              Description Deps
+              10    localhost#unknown               Should always get executed 12
+              11    localhost#unknown Should not be executed unless 'force' is 9,10
+              12    localhost#unknown               Should always get executed 
+              13    localhost#unknown Should not be executed unless 'force' is 9
+              14    localhost#unknown Should not be executed unless 'force' is 13,12
+               9    localhost#unknown Returning WARNING is considered an error 
+
+
+
+Executed Actions: 6 (100.0 %)	Legend: @=remote, RC=Returned Code
+              Id   Submitted Time     Started Time       Ended Time                 Duration  RC [@]Component Set
+              12  16:33:16.524492  16:33:16.527113  16:33:19.529893           0:00:03.002780   0 localhost#unknown
+               9  16:33:16.524728  16:33:16.528978  16:33:17.531523           0:00:01.002545  75 localhost#unknown
+              13  16:33:17.531633  16:33:17.532814  16:33:18.536329           0:00:01.003515   0 localhost#unknown
+              10  16:33:19.529958  16:33:19.531271  16:33:21.534724           0:00:02.003453   0 localhost#unknown
+              14  16:33:19.531360  16:33:19.532704  16:33:20.536107           0:00:01.003403   0 localhost#unknown
+              11  16:33:21.534794  16:33:21.536141  16:33:24.539793           0:00:03.003652   0 localhost#unknown
+
+
+
+Errors: 0 (0.0 %)	Legend: rDeps=reverse dependencies, RC=returned code
+              Id  RC #rDeps  %rDeps rDeps
+
+
+
+Unexecuted Actions: 0 (0.0 %)	Legend: mDeps=missing (error or unexecuted) dependencies
+              Id  #Deps #mDeps  %mDeps mDeps
+
+
+
+==================================== STATS ====================================
+Parsing Duration: 0:00:00.000651 (0.0 %)
+Modeling Duration: 0:00:00.003640 (0.0 %)
+Execution Duration: 0:00:08.015534 (99.9 %)
+Sequential Duration: 0:00:11.019348
+Overall Duration: 0:00:08.019825
+SpeedUp: x 1.37
+Overall Returned Code: 75
+

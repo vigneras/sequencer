@@ -1,0 +1,295 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+
+"""
+Command Line Interface (CLI) of the clmsequencer.
+
+This command is the front end for the clmsequencer.
+
+It basically provides the command line interface, parse options and
+arguments and then call the clmsequencer API.
+
+The clmsequencer is made of three stages:
+
+1. Dependency Graph Maker (DGM): it creates the dependency graph according
+to input.
+
+2. Instructions Sequence Maker (ISM): it creates a sequence from the
+previously created dependency graph
+
+3. Instructions Sequence Executor (ISE): it executes the instructions
+sequence specified.
+
+Each stage as its own CLI that is wrapped by the clmsequencer command.
+
+Finally, those three stages can be chained and executed directly.
+"""
+from __future__ import print_function
+
+import ConfigParser
+import logging
+import optparse
+import os, sys
+import resource
+
+import clmsequencer
+from clmsequencer.chain import cli as chain_cli
+from clmsequencer.commons import get_package_name, get_version, get_basedir
+from clmsequencer.dgm import cli as dgm_cli
+from clmsequencer.dgm.db import SequencerFileDB
+from clmsequencer.ise import cli as ise_cli
+from clmsequencer.ism import cli as ism_cli
+from clmsequencer.tracer import init_trace
+
+
+__author__ = "Pierre Vigneras"
+__copyright__ = "Copyright (c) 2010 Bull S.A.S."
+__credits__ = ["Pierre Vigneras"]
+__version__ = get_version()
+
+# Use the module name instead of a hardwired string in case the module
+# name change (e.g: from clmsequencer to sequencer when it will become
+# open-source.
+_logger = logging.getLogger(clmsequencer.__name__)
+
+def tab(count=1):
+    """
+    Define 'count' tabulations.
+    """
+    return ' ' * (4 * count)
+
+def add2path(path):
+    """
+    Add the given path to this process PATH.
+    """
+    if path is not None and len(path) > 0:
+        _logger.info("Including %s in current $PATH", path)
+        os.environ['PATH'] = os.environ['PATH'] + ":" + path
+
+def _change_dir(option, opt_str, value, parser, *args):
+    """
+    Callback handler used during options parsing when the dir
+    option has been specified.
+    This callback stores the directory specified and then call
+    _update_usage().
+    """
+    assert len(args) == 1
+    usage_parms = args[0]
+    usage_parms['dir'] = value
+    _update_usage(parser, usage_parms)
+
+def _change_base(option, opt_str, value, parser, *args):
+    """
+    Callback handler used during options parsing when the base
+    option has been specified.  This callback stores the directory
+    specified and then call _update_usage().
+    """
+    assert len(args) == 1
+    usage_parms = args[0]
+    usage_parms['base'] = value
+    _update_usage(parser, usage_parms)
+
+def _update_usage(parser, usage_parms):
+    """
+    Update the usage with rulesets found in dir/base/*.rs
+    """
+    basedir = os.path.join(usage_parms['dir'], usage_parms['base'])
+    db = SequencerFileDB(basedir)
+    usage_data_for = {}
+    shortcut_usage = []
+    rules_map = db.get_rules_map()
+    # Ruleset are shortcut for 'chain ruleset'
+    shortcuts = rules_map.keys()
+    for action in shortcuts:
+        usage_line = "\t%s" % action
+        shortcut_usage.append(usage_line)
+        usage_data_for[action] = {'doc': None, 'main':chain_cli.chain}
+
+    normal_usage = _get_normal_usage(usage_data_for)
+
+    cmd_name = os.path.basename(sys.argv[0])
+    usage = "%prog [global_options]" + \
+        " <action> [action_options] <action parameters>\n" + \
+        "\n" + tab() + "<normal actions>:\n" + \
+        "\n".join(sorted(normal_usage)) + \
+        "\n\n" + tab() + "<shortcut actions (equivalent to " + \
+        "'chain <shortcut>')>:\n" + \
+        "\n".join(sorted(shortcut_usage))
+
+    doc = "Use --help for the global help. Use <action> --help for" + \
+        " the specified action help."
+
+    parser.usage = usage
+    parser.description = doc
+    usage_parms['config'] = _get_config_from(basedir)
+    usage_parms['db'] = db
+    usage_parms['data'] = usage_data_for
+    usage_parms['shortcuts'] = shortcuts
+
+def _get_normal_usage(usage_data_for):
+    """
+    Returns the normal sequencer usage taken from each sequencer layer cli.
+    """
+    normal_usage = []
+    for cli in [dgm_cli, ism_cli, ise_cli, chain_cli]:
+        usage_data = cli.get_usage_data()
+        for action_name in usage_data:
+            if action_name in usage_data_for:
+                raise ValueError("Ouch! Duplicate action name found: %s" %\
+                                 action_name)
+            usage_line = "\t%s: %s" %\
+                         (action_name, usage_data[action_name]['doc'])
+            normal_usage.append(usage_line)
+            usage_data_for[action_name] = usage_data[action_name]
+
+    return normal_usage
+
+def _get_config_from(basedir):
+    """
+    Returns the ConfigParser instance from given 'basedir'
+    """
+    config = ConfigParser.SafeConfigParser({'db_name':None,
+                                            'filter_path':None,
+                                            'depsfinder_path':None,
+                                            'action_path':None,
+                                            'algo':'optimal',
+                                            'report':'none',
+                                            'fanout':'64',
+                                            'docache':'yes',
+                                            'doexec':'yes',
+                                            'dostats':'no',
+                                            'progress':'0.0',
+                                            })
+    config.add_section(dgm_cli.DEPMAKE_ACTION_NAME)
+    config.add_section(ism_cli.SEQMAKE_ACTION_NAME)
+    config.add_section(ise_cli.SEQEXEC_ACTION_NAME)
+    config_file = os.path.join(basedir, "config")
+    _logger.debug("Reading configuration file: %s", config_file)
+    config.read(config_file)
+    return config
+
+def main():
+    """
+    The main! ;-)
+    """
+    parser = optparse.OptionParser()
+    parser.disable_interspersed_args()
+    usage_parms = dict()
+    usage_parms['base'] = ''
+    usage_parms['dir'] = get_basedir()
+    usage_parms['data'] = dict()
+    _update_usage(parser, usage_parms)
+
+    parser.add_option('-d', '--dir', dest="dir", type='string', nargs=1,
+                      default=get_basedir(),
+                      action="callback", callback=_change_dir,
+                      callback_args = (usage_parms,),
+                      help='Specify the configuration directory.' + \
+                      ' Default: %default.')
+    parser.add_option('-b', '--base', dest='base', type='string', nargs=1,
+                      default='',
+                      action="callback", callback=_change_base,
+                      callback_args = (usage_parms,),
+                      help = 'Specify a BASE directory relative to DIR' + \
+                      ' where rulesets should be found.')
+    parser.add_option("-v", "--verbose", dest="verbose",
+                      action='store_true', default=False,
+                      help="Display all level messages on output" + \
+                          " except DEBUG level.")
+    parser.add_option("-q", "--quiet", dest="quiet",
+                      action='store_true', default=False,
+                      help="Display only WARNING, ERROR, CRITICAL" + \
+                          " level messages on output (standard error).")
+    parser.add_option("-D", "--Debug", dest="debug",
+                      action='store_true', default=False,
+                      help="Display all level messages on output.")
+    parser.add_option("-V", "--Version", dest="version",
+                      action="store_true", default=False,
+                      help="Display name, version and copyright.")
+    parser.add_option("-l", "--log", dest="log", type='string', nargs=1,
+                      metavar='FILE[:LEVEL]',
+                      help="Log all messages above LEVEL to the given FILE." + \
+                          " (LEVEL=DEBUG if not specified)")
+
+    (options, args) = parser.parse_args()
+
+
+    config = usage_parms['config']
+    db = usage_parms['db']
+    usage_data_for = usage_parms['data']
+    shortcuts = usage_parms['shortcuts']
+
+    init_trace(options)
+
+    if (options.version):
+        _logger.output(get_package_name() + "-" + get_version() + \
+            " Copyright (C) 2009  Bull S. A. S.  -  All rights reserved\n")
+
+    if len(args) < 1:
+        parser.error("main: wrong number of arguments.")
+
+    # Setting new limits on number of processes and number of open files
+    # to the maximum available (i.e. '-1').
+
+    nproc_hard_limit = resource.getrlimit(resource.RLIMIT_NPROC)[1]
+    nofile_hard_limit = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+    _logger.info("Setting nproc and nofile to their hard limits: %d, %d",
+                 nproc_hard_limit, nofile_hard_limit)
+    resource.setrlimit(resource.RLIMIT_NPROC, (nproc_hard_limit,
+                                               nproc_hard_limit))
+    resource.setrlimit(resource.RLIMIT_NOFILE, (nofile_hard_limit,
+                                                nofile_hard_limit))
+
+
+    filter_path = config.get(dgm_cli.DEPMAKE_ACTION_NAME, 'filter_path')
+    depsfinder_path = config.get(dgm_cli.DEPMAKE_ACTION_NAME, 'depsfinder_path')
+    action_path = config.get(ise_cli.SEQEXEC_ACTION_NAME, 'action_path')
+
+    # Currently, we just modify this process PATH with the path given
+    # by the configuration file (if provided). This will be forwarded
+    # to children.
+    # A better option would be to use the given path only for the given
+    # call (filter_path for filters, depsfinder_path for depsfinders).
+    add2path(filter_path)
+    add2path(depsfinder_path)
+    add2path(action_path)
+
+    action = args[0]
+    try:
+        data = usage_data_for[action]
+        # Remove the action name if it is not a shortcut
+        if action not in shortcuts:
+            params = args[1:]
+        else:
+            params = args
+    except KeyError:
+        parser.error("Unknown action: %s" % args[0])
+
+    main = data['main']
+    rc = main(db, config, params)
+    exit(rc)
+
+
+if __name__ == "__main__":
+    main()
+
+
+

@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<digraph>
+  <node id="a#ta">
+    <attribute attr="R1" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+  <node id="b#tb">
+    <attribute attr="R1" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+  <node id="c#tc">
+    <attribute attr="R2" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+  <node id="d#td">
+    <attribute attr="R2" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+  <node id="e#te">
+    <attribute attr="R3" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+    <attribute attr="R4"
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+  <node id="f#tf">
+    <attribute attr="R3" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+    <attribute attr="R4" 
+               value="n=$((1+$RANDOM%5)) bash -c 'echo Sleeping for $n;sleep $n'"/>
+  </node>
+
+  <edge from="a#ta" label="R1" to="b#tb" wt="1"/>
+  <edge from="a#ta" label="R2" to="c#tc" wt="1"/>
+
+  <edge from="d#td" label="R3" to="e#te" wt="1"/>
+  <edge from="d#td" label="R3" to="f#tf" wt="1"/>
+
+  <edge from="c#tc" label="R4" to="e#te" wt="1"/>
+  <edge from="f#tf" label="R4" to="b#tb" wt="1"/>
+  
+</digraph>

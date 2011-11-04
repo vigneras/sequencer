@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+-->
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:ise="http://www.xml.bcm.bull/clmsequencer/ise"
+	targetNamespace="http://www.xml.bcm.bull/clmsequencer/ise"
+        elementFormDefault="qualified">
+  <annotation>
+    <documentation xml:lang="en">
+      Schema for the Instructions Sequence Executor (ISE) input file
+      of the Sequencer.
+
+      The parser is embedded into the clmsequencer command.
+    </documentation>
+  </annotation>
+
+  <element name="instructions" type="ise:instructionsType">
+    <annotation>
+      <documentation xml:lang="en">
+	The document root is a set of 'instructions' to execute.
+      </documentation>
+    </annotation>
+    <key name="actionIdKey">
+      <selector xpath=".//ise:action"/>
+      <field xpath="@id"/>
+    </key>
+<!--
+    <keyref name="depsRef" refer="ise:actionIdKey">
+      <selector xpath=".//ise:action"/>
+      <field xpath="@deps"/>
+    </keyref>
+-->
+  </element>
+
+  <complexType name="instructionsType" mixed="false">
+    <choice minOccurs="1" maxOccurs="1">
+      <element name="seq" type="ise:sequenceType"
+	       minOccurs="0" maxOccurs="1"/>
+      <element name="par" type="ise:parallelType"
+	       minOccurs="0" maxOccurs="1"/>
+      <element name="action" type="ise:actionType"
+               minOccurs="0" maxOccurs="1"/>
+    </choice>
+  </complexType>
+
+  <attributeGroup name="commonAttributes">
+    <attribute name="desc" type="string">
+      <annotation>
+        <documentation>
+          The 'desc' attribute represents a description. This
+          description is used for logging when requested.
+        </documentation>
+      </annotation>
+    </attribute>
+  </attributeGroup>
+
+  <complexType name="actionType" mixed="false">
+    <annotation>
+      <documentation>
+        The 'action' element specifies the actual action that should
+        be executed by the Instructions Sequence Executor.
+      </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="id" type="string" use="required">
+          <annotation>
+            <documentation>
+              The action 'id' should be unique in the whole 'instructions' set.
+            </documentation>
+          </annotation>
+        </attribute>
+        <attribute name="component_set" type="string" default="localhost">
+          <annotation>
+            <documentation>
+              The 'component_set' defines the component that will be
+              impacted by the action. If not set, it default to
+              'localhost'.
+            </documentation>
+          </annotation>
+        </attribute>
+        <attribute name="remote" type="boolean" default="false">
+          <annotation>
+            <documentation>
+              The 'remote' attribute tells the engine how the action
+              should be executed. If 'false' (default), action will be
+              executed locally. If 'true', the action will be executed
+              remotely.
+            </documentation>
+          </annotation>
+        </attribute>
+        <attribute name="force" default="allowed">
+          <simpleType>
+            <annotation>
+              <documentation>
+                The 'force' attribute specifies how to deal with the
+                exit code of the action. By default, 'allowed' means
+                that a returned code of 75 (TEMP_FAIL alias WARNING)
+                is considered an ERROR unless option '--Force' is
+                specified. In this case, the exit code is considered
+                as OK. When set to 'always', an exit code of 75 is
+                always considered OK whether option '--Force' is
+                specified or not. When set to 'never', an exit code of
+                75 is never considered OK (and is therefore always
+                considered as an ERROR) wether option '--Force' is
+                specified or not.
+              </documentation>
+            </annotation>
+            <restriction base="string">
+              <enumeration value="allowed"/>
+              <enumeration value="always"/>
+              <enumeration value="never"/>
+            </restriction>
+          </simpleType>
+        </attribute>
+        <attribute name="deps" type="string" use="optional">
+          <annotation>
+            <documentation>
+              The 'deps' attribute tells the engine that the current
+              action depends on the correct completion of another
+              action before being executed. Note that the 'seq'
+              element implicitely defines such a dependency with the
+              immediate previous element (if any). This attribute
+              should therefore only be used to refer to an action that
+              is not in the current block (seq/par).
+            </documentation>
+          </annotation>
+        </attribute>
+        <attributeGroup ref="ise:commonAttributes"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="sequenceType">
+    <annotation>
+      <documentation>
+        The 'seq' element specifies an ordered set of instructions.
+      </documentation>
+    </annotation>
+    <choice minOccurs="1" maxOccurs="unbounded">
+      <element name="action" type="ise:actionType"/>
+      <element name="par" type="ise:parallelType"/>
+      <element name="seq" type="ise:sequenceType"/>
+    </choice>
+    <attributeGroup ref="ise:commonAttributes"/>
+  </complexType>
+
+  <complexType name="parallelType">
+    <annotation>
+      <documentation>
+        The 'par' element specifies an unordered set of actions that
+        can be executed in parallel.
+      </documentation>
+    </annotation>
+    <choice minOccurs="1" maxOccurs="unbounded">
+      <element name="action" type="ise:actionType"/>
+      <element name="seq" type="ise:sequenceType"/>
+      <element name="par" type="ise:parallelType"/>
+    </choice>
+    <attributeGroup ref="ise:commonAttributes"/>
+  </complexType>
+
+</schema>
