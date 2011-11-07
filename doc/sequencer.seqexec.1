@@ -3,9 +3,9 @@
 .\"
 .TH seqexec 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer seqexec \- Execute the sequence of instructions given.
+sequencer seqexec \- Execute the sequence of instructions given.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B seqexec
 [action_options]
@@ -14,13 +14,13 @@ The
 .B seqexec
 action invokes the Instructions Sequence Executor (ISE), the third
 stage of the
-.BR clmsequencer (1).
+.BR sequencer (1).
 It is used for the actual execution of a sequence of instructions that
 is usually computed by
 .BR seqmake (1).
 A sequence of instructions is an XML file that follows the XSD
 Schema installed at
-.B clmsequencer/ise/ise.xsd
+.B sequencer/ise/ise.xsd
 relative to your Python library directory (usually at
 /usr/lib/python2.6/site-packages).
 
@@ -177,17 +177,17 @@ unless an executed action returned something different than OK or
 WARNING.
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .TP
-.B clmsequencer/ise/ise.xsd
+.B sequencer/ise/ise.xsd
 the
 .BR seqexec (5)
 input XML schema.
@@ -195,40 +195,40 @@ input XML schema.
 Standard execution
 .RS 4
 .EX
-$ cat input.ise.xml | clmsequencer seqexec
+$ cat input.ise.xml | sequencer seqexec
 .EE
 .RE
 Use a file directly instead of piping to standard input
 .RS 4
 .EX
-$ clmsequencer seqexec -f input.ise.xml
+$ sequencer seqexec -f input.ise.xml
 .EE
 .RE
 Same thing with progress report of 1 second
 .RS 4
 .EX
-$ clmsequencer seqexec -f input.ise.xml \\
+$ sequencer seqexec -f input.ise.xml \\
                 --progress 1
 .EE
 .RE
 Provide some statistics
 .RS 4
 .EX
-$ clmsequencer seqexec -f input.ise.xml \\
+$ sequencer seqexec -f input.ise.xml \\
                 --dostats=yes
 .EE
 .RE
 Error report only
 .RS 4
 .EX
-$ clmsequencer seqexec -f input.ise.xml \\
+$ sequencer seqexec -f input.ise.xml \\
                 --report error
 .EE
 .RE
 Be verbose, report all including statistics
 .RS 4
 .EX
-$ clmsequencer -v seqexec -f input.ise.xml \\
+$ sequencer -v seqexec -f input.ise.xml \\
                 --report all \\
                 --dostats=yes
 .EE
@@ -237,7 +237,7 @@ Do not execute but output the actions dependency graph to /tmp/ise.dot,
 and provide a model report
 .RS 4
 .EX
-$ clmsequencer -v seqexec -f input.ise.xml \\
+$ sequencer -v seqexec -f input.ise.xml \\
                 --doexec=on \\
                 --actionsgraphto=/tmp/ise.dot \\
                 --report model
@@ -245,7 +245,7 @@ $ clmsequencer -v seqexec -f input.ise.xml \\
 .RE
 .SH "SEE ALSO"
 .SS "Sequencer"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SS "Sequencer ISE Input Formats"
 .BR seqexec (5)
 .SH AUTHOR

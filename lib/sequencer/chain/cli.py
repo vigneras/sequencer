@@ -18,13 +18,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-Command Line Interface (CLI) of the clmsequencer Chain feature.
+Command Line Interface (CLI) of the sequencer Chain feature.
 
 This command is a shortcut for the following:
 
-clmsequencer depmake <arguments> | \
-clmsequencer seqmake <options>   | \
-clmsequencer seqexec <options>
+sequencer depmake <arguments> | \
+sequencer seqmake <options>   | \
+sequencer seqexec <options>
 
 It does the same thing without the creation of XML file at eath stages
 (wherever possible).
@@ -34,11 +34,11 @@ import os
 import time
 from logging import getLogger
 
-from clmsequencer.commons import write_graph_to, CyclesDetectedError, \
+from sequencer.commons import write_graph_to, CyclesDetectedError, \
      get_version, add_options_to
-from clmsequencer.dgm import cli as dgm_cli
-from clmsequencer.ise import cli as ise_cli
-from clmsequencer.ism import cli as ism_cli
+from sequencer.dgm import cli as dgm_cli
+from sequencer.ise import cli as ise_cli
+from sequencer.ism import cli as ism_cli
 
 
 __author__ = "Pierre Vigneras"

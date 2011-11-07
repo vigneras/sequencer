@@ -3,10 +3,10 @@
 .\"
 .TH seqmake 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer seqmake \- Compute an instructions sequence from a dependency graph.
+sequencer seqmake \- Compute an instructions sequence from a dependency graph.
 
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B seqmake
 [action_options]
@@ -15,7 +15,7 @@ The
 .B seqmake
 action invokes the Instructions Sequence Maker (ISM), the second stage
 of the
-.BR clmsequencer (1).
+.BR sequencer (1).
 It reads a dependency graph from its standard input (by default) and
 returns a sequence of instructions on its standard output (by
 default). The dependency graph is an XML document that has usually been
@@ -118,43 +118,43 @@ if something went wrong.
 
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 
 .SH EXAMPLE
 Standard execution
 .RS 4
 .EX
-$ cat input.seqmake.xml | clmsequencer seqmake
+$ cat input.seqmake.xml | sequencer seqmake
 .EE
 .RE
 
 Same thing with 'par' algorithm
 .RS 4
 .EX
-$ cat input.seqmake.xml | clmsequencer seqmake --algo=par
+$ cat input.seqmake.xml | sequencer seqmake --algo=par
 .EE
 .RE
 
 Read from input file and write to output file, being verbose.
 .RS 4
 .EX
-$ clmsequencer -v seqexec -f input.seqmake.xml -o output.seqmake.xml
+$ sequencer -v seqexec -f input.seqmake.xml -o output.seqmake.xml
 .EE
 .RE
 
 .SH "SEE ALSO"
 .SS "Sequencer"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SS "Sequencer ISM Input Formats"
-.BR clmsequencer.seqmake (5)
+.BR sequencer.seqmake (5)
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net

@@ -21,7 +21,7 @@ import random
 import subprocess
 import unittest
 
-from clmsequencer.ise.rc import ACTION_RC_OK, ACTION_RC_WARNING
+from sequencer.ise.rc import ACTION_RC_OK, ACTION_RC_WARNING
 
 from tests.ise import tools
 

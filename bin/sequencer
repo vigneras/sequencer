@@ -20,14 +20,14 @@
 ###############################################################################
 
 """
-Command Line Interface (CLI) of the clmsequencer.
+Command Line Interface (CLI) of the sequencer.
 
-This command is the front end for the clmsequencer.
+This command is the front end for the sequencer.
 
 It basically provides the command line interface, parse options and
-arguments and then call the clmsequencer API.
+arguments and then call the sequencer API.
 
-The clmsequencer is made of three stages:
+The sequencer is made of three stages:
 
 1. Dependency Graph Maker (DGM): it creates the dependency graph according
 to input.
@@ -38,7 +38,7 @@ previously created dependency graph
 3. Instructions Sequence Executor (ISE): it executes the instructions
 sequence specified.
 
-Each stage as its own CLI that is wrapped by the clmsequencer command.
+Each stage as its own CLI that is wrapped by the sequencer command.
 
 Finally, those three stages can be chained and executed directly.
 """
@@ -50,14 +50,14 @@ import optparse
 import os, sys
 import resource
 
-import clmsequencer
-from clmsequencer.chain import cli as chain_cli
-from clmsequencer.commons import get_package_name, get_version, get_basedir
-from clmsequencer.dgm import cli as dgm_cli
-from clmsequencer.dgm.db import SequencerFileDB
-from clmsequencer.ise import cli as ise_cli
-from clmsequencer.ism import cli as ism_cli
-from clmsequencer.tracer import init_trace
+import sequencer
+from sequencer.chain import cli as chain_cli
+from sequencer.commons import get_package_name, get_version, get_basedir
+from sequencer.dgm import cli as dgm_cli
+from sequencer.dgm.db import SequencerFileDB
+from sequencer.ise import cli as ise_cli
+from sequencer.ism import cli as ism_cli
+from sequencer.tracer import init_trace
 
 
 __author__ = "Pierre Vigneras"
@@ -66,9 +66,9 @@ __credits__ = ["Pierre Vigneras"]
 __version__ = get_version()
 
 # Use the module name instead of a hardwired string in case the module
-# name change (e.g: from clmsequencer to sequencer when it will become
+# name change (e.g: from sequencer to sequencer when it will become
 # open-source.
-_logger = logging.getLogger(clmsequencer.__name__)
+_logger = logging.getLogger(sequencer.__name__)
 
 def tab(count=1):
     """

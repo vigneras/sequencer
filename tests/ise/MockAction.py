@@ -22,7 +22,7 @@ import os
 import sys
 
 
-# This script is used for unit testing of the Bull clmsequencer
+# This script is used for unit testing of the Bull sequencer
 # Instructions Sequence Executor stage.
 
 if len(sys.argv) != 4:

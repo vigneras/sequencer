@@ -1,2 +1,2 @@
 # This content is overwritten by the Makefile, do not touch!
-clmsequencer.version = ?.?-Bull.?-snapshot (Development Version)
+sequencer.version = ?.?-Bull.?-snapshot (Development Version)

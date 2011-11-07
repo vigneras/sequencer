@@ -1,16 +1,16 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH clmsequencer.dgmdb 1 "August 2010" bullx "Sequencer Manual"
+.TH sequencer.dgmdb 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer db* \- Sequencer Dependency Graph Maker Database Management
+sequencer db* \- Sequencer Dependency Graph Maker Database Management
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B action
 [action_options]
 .SH DESCRIPTION
-.B clmsequencer
+.B sequencer
 is used to manage the
 .B sequencer
 dependency table (also known as the dependency graph maker
@@ -19,25 +19,25 @@ database). See
 for details regarding the sequencer table columns name and meaning.
 
 There are two option levels for
-.BR clmsequencer :
+.BR sequencer :
 
 .RS 4
 .IP - 2
 Global Options:
 are specified before the action (see
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.)
 .IP - 2
 Action Options:
 are specified after the action.
 .RE
 .SH ACTIONS
-The clmsequencer command understand the following actions:
+The sequencer command understand the following actions:
 .TP 11
 .B dbcreate
 Create the sequencer table. There are no option. This basically
 creates the configuration directory (normally inside
-/etc/clmsequencer/<cmd> where <cmd> is the command name).
+/etc/sequencer/<cmd> where <cmd> is the command name).
 .TP
 .B dbdrop
 .RB [ --Enforce ]
@@ -167,26 +167,26 @@ otherwise.
 
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 
 .TP
 .B CONFDIR/*.rs
 Ruleset files. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 
 .SH EXAMPLE
 Create a new command for storing rulesets:
 .RS 4
 .EX
-# ln -s $(which clmsequencer) seqtest
+# ln -s $(which sequencer) seqtest
 .EE
 .RE
 Create the dependency table for this command:
@@ -257,7 +257,7 @@ $ seqtest -E dbdrop
 .EE
 .RE
 .SH "SEE ALSO"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net

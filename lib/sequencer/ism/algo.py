@@ -33,12 +33,12 @@ from __future__ import print_function
 
 import logging
 
-import clmsequencer.ise.model as ise_model
-from clmsequencer.commons import SequencerError, CyclesDetectedError, \
+import sequencer.ise.model as ise_model
+from sequencer.commons import SequencerError, CyclesDetectedError, \
      get_version, remove_leaves
-from clmsequencer.ise.parser import ACTION, SEQ, PAR, ISE, \
+from sequencer.ise.parser import ACTION, SEQ, PAR, ISE, \
     NS_SEQ_TAG, DEPS_ATTR
-from clmsequencer.ise.rc import FORCE_ALLOWED
+from sequencer.ise.rc import FORCE_ALLOWED
 from lxml import etree as ET
 from pygraph.algorithms.critical import transitive_edges
 from pygraph.algorithms.cycles import find_cycle

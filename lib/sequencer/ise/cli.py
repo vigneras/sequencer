@@ -18,12 +18,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-Command Line Interface (CLI) of the ISE clmsequencer.
+Command Line Interface (CLI) of the ISE sequencer.
 
-This command is the front end for the clmsequencer ISE stage.
+This command is the front end for the sequencer ISE stage.
 
 It basically parse ISE options and arguments and then call the
-clmsequencer ISE API.
+sequencer ISE API.
 """
 from __future__ import division
 
@@ -34,10 +34,10 @@ from datetime import datetime as dt, timedelta
 from logging import getLogger
 
 from ClusterShell.NodeSet import NodeSet
-from clmsequencer.commons import get_tracer, write_graph_to, get_header, \
+from sequencer.commons import write_graph_to, get_header, \
     smart_display, HSEP, CyclesDetectedError, td_to_seconds, get_version, \
     add_options_to
-from clmsequencer.ise import api, model, parser
+from sequencer.ise import api, model, parser
 
 
 __author__ = "Pierre Vigneras"
@@ -67,8 +67,6 @@ _ISE_MODEL_FORMAT = "%*.*s %*.*s %*.*s %s"
 _ISE_EXEC_FORMAT = "%*.*s  %*.*s  %*.*s  %*.*s  %*.*s %*.*s %s"
 _ISE_ERROR_FORMAT = "%*.*s %*.*s %*.*s %*.*s %s"
 _ISE_UNEXEC_FORMAT = "%*.*s %*.*s %*.*s %*.*s %s"
-
-_TRACER = get_tracer()
 
 def get_usage_data():
     """

@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 
+<!--
    $Id: sample.ise.xml,v 1.1 2011/02/15 10:24:48 vigneras Exp $
 
    This is an example of an Instructions Sequence Executor input file.
-   
+
   -->
 
 <instructions
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
-		       /usr/share/clmsequencer/ise.xsd"
-   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+   xsi:schemaLocation="http://www.xml.bcm.bull/sequencer/ise
+		       /usr/share/sequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/sequencer/ise">
 
   <!-- Each desc will be used for logging when the verbose option is
   passed to the ISE.  -->

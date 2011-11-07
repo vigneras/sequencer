@@ -24,7 +24,7 @@ This module defines various stuff for the ISE.
 # When an action is executed, its returned code (aka 'rc') is used for
 # error management
 import os
-from clmsequencer.commons import get_version
+from sequencer.commons import get_version
 
 __author__ = "Pierre Vigneras"
 __copyright__ = "Copyright (c) 2010 Bull S.A.S."

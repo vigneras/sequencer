@@ -25,7 +25,7 @@ import os
 import sqlite3
 import tempfile
 
-from clmsequencer.dgm.db import SequencerSQLDB
+from sequencer.dgm.db import SequencerSQLDB
 
 from abstracttestdb import AbstractDGMDBTest
 from tests.commons import SQLiteDB

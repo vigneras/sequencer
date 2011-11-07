@@ -20,7 +20,7 @@
 import unittest
 
 import sys
-from clmsequencer.commons import get_tracer, get_header, GenericDB
+from sequencer.commons import get_header, GenericDB
 import re
 import logging
 
@@ -33,7 +33,7 @@ _logger.addHandler(_handler)
 _logger.setLevel(logging.DEBUG)
 
 class BaseTest(unittest.TestCase):
-    """Base Test Class for all clmsequencer"""
+    """Base Test Class for all sequencer"""
     def setUp(self):
         _logger.debug(get_header(" Start %s " % self.id(), "*", 120))
 

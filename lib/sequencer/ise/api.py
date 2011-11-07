@@ -25,9 +25,9 @@ import time
 from datetime import datetime as dt
 
 from ClusterShell.Task import EventHandler, task_self
-from clmsequencer.commons import get_nodes_from, get_version
-from clmsequencer.ise import parser, model
-from clmsequencer.ise.rc import should_stop, is_error_rc, is_warning_rc, \
+from sequencer.commons import get_nodes_from, get_version
+from sequencer.ise import parser, model
+from sequencer.ise.rc import should_stop, is_error_rc, is_warning_rc, \
     ACTION_RC_OK, ACTION_RC_WARNING, ACTION_RC_UNEXECUTED
 
 

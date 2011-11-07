@@ -18,15 +18,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-Unit test of the ISE CLI ('clmsequencer [options] seqexec [options]')
+Unit test of the ISE CLI ('sequencer [options] seqexec [options]')
 """
 import os
 import tempfile
 from subprocess import Popen, PIPE
 
 import lxml
-from clmsequencer.ise.rc import ACTION_RC_OK, ACTION_RC_WARNING, ACTION_RC_KO
-from clmsequencer.ise.parser import ISE, PAR, SEQ, ACTION
+from sequencer.ise.rc import ACTION_RC_OK, ACTION_RC_WARNING, ACTION_RC_KO
+from sequencer.ise.parser import ISE, PAR, SEQ, ACTION
 
 import tools
 
@@ -42,13 +42,13 @@ class TestCLIBasic(tools.AssertCLI):
     """Basic check of the ISE CLI"""
 
     def test_NoArgsUsage(self):
-        (output, error) = Popen(["clmsequencer"],
+        (output, error) = Popen(["sequencer"],
                                 stdout=PIPE,
                                 stderr=PIPE,
                                 env={'PATH':BIN_PATH,
                                      'PYTHONPATH':PYTHON_PATH}
                                 ).communicate()
-        self.check(r"^Usage: clmsequencer \[global_options\] <action> \[action_options\] <action parameters>.*$",
+        self.check(r"^Usage: sequencer \[global_options\] <action> \[action_options\] <action parameters>.*$",
                    error)
 
     def test_NoExec(self):
@@ -57,7 +57,7 @@ class TestCLIBasic(tools.AssertCLI):
                                                     "Message2StdErr"),
                              id="a")))
         xml = lxml.etree.tostring(doc, pretty_print=True)
-        process = Popen(["clmsequencer", "seqexec", "--doexec=no",
+        process = Popen(["sequencer", "seqexec", "--doexec=no",
                          "--report", "all"],
                         stdin=PIPE,
                         stdout=PIPE,
@@ -80,7 +80,7 @@ class TestCLIBasic(tools.AssertCLI):
                                               prefix=self.__class__.__name__ + "-",
                                               delete=True)
         filename = tmpfile.name
-        process = Popen(["clmsequencer", "seqexec",
+        process = Popen(["sequencer", "seqexec",
                          "--actionsgraphto=%s"%filename],
                         stdin=PIPE,
                         stdout=PIPE,
@@ -99,7 +99,7 @@ class TestCLIBasic(tools.AssertCLI):
                                                     "Message2StdErr"),
                              id="a")))
         xml = lxml.etree.tostring(doc, pretty_print=True)
-        process = Popen(["clmsequencer", "seqexec", "--report", "all"],
+        process = Popen(["sequencer", "seqexec", "--report", "all"],
                         stdin=PIPE,
                         stdout=PIPE,
                         stderr=PIPE,
@@ -125,7 +125,7 @@ class TestCLIBasic(tools.AssertCLI):
                              id="b"),
                       desc="test_ExecWarning"))
         xml = lxml.etree.tostring(doc, pretty_print=True)
-        process = Popen(["clmsequencer", "seqexec", "--report", "all"],
+        process = Popen(["sequencer", "seqexec", "--report", "all"],
                         stdin=PIPE,
                         stdout=PIPE,
                         stderr=PIPE,
@@ -151,7 +151,7 @@ class TestCLIBasic(tools.AssertCLI):
                              id="b"),
                       desc="test_ExecWarning"))
         xml = lxml.etree.tostring(doc, pretty_print=True)
-        process = Popen(["clmsequencer", "seqexec",
+        process = Popen(["sequencer", "seqexec",
                          "--Force", "--report", "all"],
                         stdin=PIPE,
                         stdout=PIPE,
@@ -178,7 +178,7 @@ class TestCLIBasic(tools.AssertCLI):
                              id="b"),
                       desc="test_ExecWarning"))
         xml = lxml.etree.tostring(doc, pretty_print=True)
-        process = Popen(["clmsequencer", "seqexec", "--report", "all"],
+        process = Popen(["sequencer", "seqexec", "--report", "all"],
                         stdin=PIPE,
                         stdout=PIPE,
                         stderr=PIPE,

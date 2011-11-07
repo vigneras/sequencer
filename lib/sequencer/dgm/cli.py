@@ -18,12 +18,12 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-Command Line Interface (CLI) of the DGM clmsequencer.
+Command Line Interface (CLI) of the DGM sequencer.
 
-This command is the front end for the clmsequencer DGM stage.
+This command is the front end for the sequencer DGM stage.
 
 It basically parse DGM options and arguments and then call the
-clmsequencer DGM API.
+sequencer DGM API.
 """
 from __future__ import print_function
 
@@ -34,13 +34,13 @@ import os
 import sys
 
 from ClusterShell.NodeSet import NodeSet
-from clmsequencer.commons import confirm, UnknownRuleSet, smart_display, \
+from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
      HSEP, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
      write_graph_to, CyclesDetectedError, get_version, add_options_to, \
      replace_if_none
-from clmsequencer.dgm.db import create_rule_from_strings_array
-from clmsequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
-from clmsequencer.ise import cli as ise_cli
+from sequencer.dgm.db import create_rule_from_strings_array
+from sequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
+from sequencer.ise import cli as ise_cli
 from pygraph.readwrite.markup import write
 
 

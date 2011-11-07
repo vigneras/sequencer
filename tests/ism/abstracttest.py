@@ -20,8 +20,8 @@
 """
 Test the ISM Algorithm
 """
-from clmsequencer.commons import CyclesDetectedError
-from clmsequencer.ism.algo import REMOTE_CHAR
+from sequencer.commons import CyclesDetectedError
+from sequencer.ism.algo import REMOTE_CHAR
 from pygraph.classes.digraph import digraph
 
 from tests.ism.tools import add_action

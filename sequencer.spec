@@ -18,7 +18,7 @@
 ###############################################################################
 
 #TODO: define your package name
-%define name clmsequencer
+%define name sequencer
 
 # For versionning policy, please see wiki:
 # TODO: define
@@ -40,17 +40,17 @@
 %define src_filter_dir lib/filter
 %define src_setup_dir setup
 
-%define target_conf_dir /etc/clmsequencer
+%define target_conf_dir /etc/sequencer
 %define target_share_dir /usr/share/%{name}
 %define target_bin_dir /usr/bin
 %define target_sbin_dir /usr/sbin
 %define target_man_dir %{_mandir}
 %define target_lib_dir /usr/lib/python2.6/site-packages
 %define target_doc_dir /usr/share/doc/%{name}
-%define target_depsfinder_dir /usr/lib/clmsequencer/depsfinder
-%define target_filter_dir /usr/lib/clmsequencer/filter
-%define target_action_dir /usr/lib/clmsequencer/action
-%define target_tools_dir /usr/lib/clmsequencer/tools
+%define target_depsfinder_dir /usr/lib/sequencer/depsfinder
+%define target_filter_dir /usr/lib/sequencer/filter
+%define target_action_dir /usr/lib/sequencer/action
+%define target_tools_dir /usr/lib/sequencer/tools
 
 # TODO: Give your summary
 Summary:	Sequencer
@@ -74,7 +74,7 @@ BuildArch:	noarch
 URL:	 	http://forge.frec.bull.fr
 
 #TODO: What do you provide
-Provides: clmsequencer
+Provides: sequencer
 #Conflicts:
 #TODO: What do you require
 Requires: clustershell >= 1.3.3, python-graph >= 1.7.0-Bull.1, pydot >= 1.0.2, python-lxml >= 2.2.3, graphviz >= 2.26
@@ -108,12 +108,12 @@ rm -rf $RPM_BUILD_ROOT
 # Notice the use of the $RPM_BUILD_ROOT environment variable.
 
 # Install configuration files
-install -m 644 -D %{src_conf_dir}/clmsequencer.conf $RPM_BUILD_ROOT/%{target_conf_dir}/config
+install -m 644 -D %{src_conf_dir}/sequencer.conf $RPM_BUILD_ROOT/%{target_conf_dir}/config
 # Do not allow read access to others since this file contains SNMP community.
 mkdir -p $RPM_BUILD_ROOT/%{target_conf_dir}/filter
 
 # Install commands
-install -m 755 -D %{src_bin_dir}/clmsequencer $RPM_BUILD_ROOT/%{target_sbin_dir}/clmsequencer
+install -m 755 -D %{src_bin_dir}/sequencer $RPM_BUILD_ROOT/%{target_sbin_dir}/sequencer
 
 # Install Misc stuff (ChangeLog, examples, ...)
 install -m 644 -D %{src_doc_dir}/ChangeLog $RPM_BUILD_ROOT/%{target_doc_dir}/ChangeLog
@@ -123,30 +123,30 @@ install -m 644 -D %{src_doc_dir}/example.seqexec.xml $RPM_BUILD_ROOT/%{target_do
 install -m 644 -D %{src_doc_dir}/hello_world.seqexec.xml $RPM_BUILD_ROOT/%{target_doc_dir}/hello_world.seqexec.xml
 
 # Install man pages
-install -m 644 -D %{src_doc_dir}/clmsequencer.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.dgmdb.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.dgmdb.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.dgmdb.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.dgmdb.1.gz
 install -m 644 -D %{src_doc_dir}/dgmdb.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/dgmdb.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.graphrules.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.graphrules.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.graphrules.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.graphrules.1.gz
 install -m 644 -D %{src_doc_dir}/graphrules.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/graphrules.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.knowntypes.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.knowntypes.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.knowntypes.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.knowntypes.1.gz
 install -m 644 -D %{src_doc_dir}/knowntypes.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/knowntypes.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.depmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.depmake.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.depmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.depmake.1.gz
 install -m 644 -D %{src_doc_dir}/depmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/depmake.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.seqmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.seqmake.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.seqmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.seqmake.1.gz
 install -m 644 -D %{src_doc_dir}/seqmake.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/seqmake.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.seqmake.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/clmsequencer.seqmake.5.gz
+install -m 644 -D %{src_doc_dir}/sequencer.seqmake.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/sequencer.seqmake.5.gz
 install -m 644 -D %{src_doc_dir}/seqmake.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/seqmake.5.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.seqexec.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.seqexec.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.seqexec.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.seqexec.1.gz
 install -m 644 -D %{src_doc_dir}/seqexec.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/seqexec.1.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.seqexec.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/clmsequencer.seqexec.5.gz
+install -m 644 -D %{src_doc_dir}/sequencer.seqexec.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/sequencer.seqexec.5.gz
 install -m 644 -D %{src_doc_dir}/seqexec.5.gz $RPM_BUILD_ROOT/%{target_man_dir}/man5/seqexec.5.gz
-install -m 644 -D %{src_doc_dir}/clmsequencer.chain.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/clmsequencer.chain.1.gz
+install -m 644 -D %{src_doc_dir}/sequencer.chain.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/sequencer.chain.1.gz
 install -m 644 -D %{src_doc_dir}/chain.1.gz $RPM_BUILD_ROOT/%{target_man_dir}/man1/chain.1.gz
 
 
 # Install libs
-mkdir -p $RPM_BUILD_ROOT/%{target_lib_dir}/clmsequencer
-rsync --recursive --specials --links --exclude "*rpmnew" --exclude ".cvsignore" --exclude "*.pyc" %{src_lib_dir}/clmsequencer $RPM_BUILD_ROOT/%{target_lib_dir}/
+mkdir -p $RPM_BUILD_ROOT/%{target_lib_dir}/sequencer
+rsync --recursive --specials --links --exclude "*rpmnew" --exclude ".cvsignore" --exclude "*.pyc" %{src_lib_dir}/sequencer $RPM_BUILD_ROOT/%{target_lib_dir}/
 
 # Install DepsFinders
 
@@ -204,55 +204,55 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{target_doc_dir}/hello_world.seqexec.xml
 
 # Man pages
-%doc %{target_man_dir}/man1/clmsequencer.1.gz
-%doc %{target_man_dir}/man1/clmsequencer.dgmdb.1.gz
+%doc %{target_man_dir}/man1/sequencer.1.gz
+%doc %{target_man_dir}/man1/sequencer.dgmdb.1.gz
 %doc %{target_man_dir}/man1/dgmdb.1.gz
-%doc %{target_man_dir}/man1/clmsequencer.graphrules.1.gz
+%doc %{target_man_dir}/man1/sequencer.graphrules.1.gz
 %doc %{target_man_dir}/man1/graphrules.1.gz
-%doc %{target_man_dir}/man1/clmsequencer.knowntypes.1.gz
+%doc %{target_man_dir}/man1/sequencer.knowntypes.1.gz
 %doc %{target_man_dir}/man1/knowntypes.1.gz
-%doc %{target_man_dir}/man1/clmsequencer.depmake.1.gz
+%doc %{target_man_dir}/man1/sequencer.depmake.1.gz
 %doc %{target_man_dir}/man1/depmake.1.gz
-%doc %{target_man_dir}/man1/clmsequencer.seqmake.1.gz
+%doc %{target_man_dir}/man1/sequencer.seqmake.1.gz
 %doc %{target_man_dir}/man1/seqmake.1.gz
-%doc %{target_man_dir}/man5/clmsequencer.seqmake.5.gz
+%doc %{target_man_dir}/man5/sequencer.seqmake.5.gz
 %doc %{target_man_dir}/man5/seqmake.5.gz
-%doc %{target_man_dir}/man1/clmsequencer.seqexec.1.gz
+%doc %{target_man_dir}/man1/sequencer.seqexec.1.gz
 %doc %{target_man_dir}/man1/seqexec.1.gz
-%doc %{target_man_dir}/man5/clmsequencer.seqexec.5.gz
+%doc %{target_man_dir}/man5/sequencer.seqexec.5.gz
 %doc %{target_man_dir}/man5/seqexec.5.gz
-%doc %{target_man_dir}/man1/clmsequencer.chain.1.gz
+%doc %{target_man_dir}/man1/sequencer.chain.1.gz
 %doc %{target_man_dir}/man1/chain.1.gz
 
 # Binary stuff
-%{target_sbin_dir}/clmsequencer
+%{target_sbin_dir}/sequencer
 
 # lib
-%{target_lib_dir}/clmsequencer/.version
-%{target_lib_dir}/clmsequencer/__init__.py
-%{target_lib_dir}/clmsequencer/commons.py
-%{target_lib_dir}/clmsequencer/tracer.py
-%{target_lib_dir}/clmsequencer/dgm/__init__.py
-%{target_lib_dir}/clmsequencer/dgm/db.py
-%{target_lib_dir}/clmsequencer/dgm/model.py
-%{target_lib_dir}/clmsequencer/dgm/cli.py
-%{target_lib_dir}/clmsequencer/dgm/errors.py
+%{target_lib_dir}/sequencer/.version
+%{target_lib_dir}/sequencer/__init__.py
+%{target_lib_dir}/sequencer/commons.py
+%{target_lib_dir}/sequencer/tracer.py
+%{target_lib_dir}/sequencer/dgm/__init__.py
+%{target_lib_dir}/sequencer/dgm/db.py
+%{target_lib_dir}/sequencer/dgm/model.py
+%{target_lib_dir}/sequencer/dgm/cli.py
+%{target_lib_dir}/sequencer/dgm/errors.py
 
-%{target_lib_dir}/clmsequencer/ism/__init__.py
-%{target_lib_dir}/clmsequencer/ism/algo.py
-%{target_lib_dir}/clmsequencer/ism/cli.py
+%{target_lib_dir}/sequencer/ism/__init__.py
+%{target_lib_dir}/sequencer/ism/algo.py
+%{target_lib_dir}/sequencer/ism/cli.py
 
-%{target_lib_dir}/clmsequencer/ise/__init__.py
-%{target_lib_dir}/clmsequencer/ise/api.py
-%{target_lib_dir}/clmsequencer/ise/rc.py
-%{target_lib_dir}/clmsequencer/ise/ise.xsd
-%{target_lib_dir}/clmsequencer/ise/model.py
-%{target_lib_dir}/clmsequencer/ise/parser.py
-%{target_lib_dir}/clmsequencer/ise/cli.py
-%{target_lib_dir}/clmsequencer/ise/errors.py
+%{target_lib_dir}/sequencer/ise/__init__.py
+%{target_lib_dir}/sequencer/ise/api.py
+%{target_lib_dir}/sequencer/ise/rc.py
+%{target_lib_dir}/sequencer/ise/ise.xsd
+%{target_lib_dir}/sequencer/ise/model.py
+%{target_lib_dir}/sequencer/ise/parser.py
+%{target_lib_dir}/sequencer/ise/cli.py
+%{target_lib_dir}/sequencer/ise/errors.py
 
-%{target_lib_dir}/clmsequencer/chain/__init__.py
-%{target_lib_dir}/clmsequencer/chain/cli.py
+%{target_lib_dir}/sequencer/chain/__init__.py
+%{target_lib_dir}/sequencer/chain/cli.py
 
 # DepsFinders
 

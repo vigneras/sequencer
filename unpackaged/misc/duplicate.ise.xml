@@ -1,7 +1,7 @@
 <ise:instructions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
-		       /usr/share/clmsequencer/ise.xsd"
-   xmlns:ise="http://www.xml.bcm.bull/clmsequencer/ise">
+   xsi:schemaLocation="http://www.xml.bcm.bull/sequencer/ise
+		       /usr/share/sequencer/ise.xsd"
+   xmlns:ise="http://www.xml.bcm.bull/sequencer/ise">
   <ise:seq>
     <ise:action id="foo" component_set="localhost">Action1</ise:action>
     <ise:action id="foo" >Action2</ise:action>

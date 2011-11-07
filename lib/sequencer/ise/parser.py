@@ -23,8 +23,8 @@ ISE Parser implementation.
 import os
 from logging import getLogger
 
-from clmsequencer.commons import get_version
-from clmsequencer.ise.rc import FORCE_ALLOWED
+from sequencer.commons import get_version
+from sequencer.ise.rc import FORCE_ALLOWED
 from lxml import etree
 from lxml.builder import ElementMaker # lxml only !
 
@@ -36,7 +36,7 @@ __version__ = get_version()
 
 _LOGGER = getLogger(__name__)
 
-ISE_NAMESPACE = "http://www.xml.bcm.bull/clmsequencer/ise"
+ISE_NAMESPACE = "http://www.xml.bcm.bull/sequencer/ise"
 NSMAP = {None : ISE_NAMESPACE} # the default namespace (no prefix)
 
 E = ElementMaker(namespace=ISE_NAMESPACE, nsmap=NSMAP)
@@ -48,9 +48,9 @@ ACTION = E.action
 
 _ISE_XML_HEADER = u"""<ise:instructions
    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-   xsi:schemaLocation=\"http://www.xml.bcm.bull/clmsequencer/ise
-		       /usr/share/clmsequencer/ise.xsd\"
-   xmlns:ise=\"http://www.xml.bcm.bull/clmsequencer/ise\">\n"""
+   xsi:schemaLocation=\"http://www.xml.bcm.bull/sequencer/ise
+		       /usr/share/sequencer/ise.xsd\"
+   xmlns:ise=\"http://www.xml.bcm.bull/sequencer/ise\">\n"""
 
 
 NS_ISE = "{%s}" % ISE_NAMESPACE

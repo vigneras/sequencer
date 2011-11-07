@@ -21,15 +21,15 @@
 -->
 
 <schema xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:ise="http://www.xml.bcm.bull/clmsequencer/ise"
-	targetNamespace="http://www.xml.bcm.bull/clmsequencer/ise"
+	xmlns:ise="http://www.xml.bcm.bull/sequencer/ise"
+	targetNamespace="http://www.xml.bcm.bull/sequencer/ise"
         elementFormDefault="qualified">
   <annotation>
     <documentation xml:lang="en">
       Schema for the Instructions Sequence Executor (ISE) input file
       of the Sequencer.
 
-      The parser is embedded into the clmsequencer command.
+      The parser is embedded into the sequencer command.
     </documentation>
   </annotation>
 
