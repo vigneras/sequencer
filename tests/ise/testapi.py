@@ -21,10 +21,10 @@ import io
 import unittest
 
 import lxml
-from clmsequencer.ise.rc import ACTION_RC_KO, ACTION_RC_WARNING, \
+from sequencer.ise.rc import ACTION_RC_KO, ACTION_RC_WARNING, \
     ACTION_RC_OK, ACTION_RC_UNEXECUTED
-from clmsequencer.ise import api
-from clmsequencer.ise.parser import ISE, SEQ, PAR, ACTION
+from sequencer.ise import api
+from sequencer.ise.parser import ISE, SEQ, PAR, ACTION
 
 from tests.ise import tools
 from tests.ise.tools import AssertAPI

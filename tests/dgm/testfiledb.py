@@ -22,7 +22,7 @@ Test the SequencerDB API
 """
 import tempfile
 
-from clmsequencer.dgm.db import SequencerFileDB
+from sequencer.dgm.db import SequencerFileDB
 from tests.dgm.abstracttestdb import AbstractDGMDBTest
 from tests.dgm.tools import AssertDB
 

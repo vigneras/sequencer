@@ -20,11 +20,11 @@
 """
 Test the DGM Model
 """
-from clmsequencer.dgm.model import RuleSet, Component, ALL, NONE
+from sequencer.dgm.model import RuleSet, Component, ALL, NONE
 
 import tests.dgm.tools as tools
 from tests.commons import BaseGraph
-from clmsequencer.dgm.cli import NOT_FORCE_OP
+from sequencer.dgm.cli import NOT_FORCE_OP
 
 
 class TestDGMModel_DepGraphBasic(BaseGraph):

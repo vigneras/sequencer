@@ -3,11 +3,11 @@
 .\"
 .TH knowntypes 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer knowntypes \- Display the types known by the given
+sequencer knowntypes \- Display the types known by the given
 ruleset along with starting rules that will be applied on them for the
 computation of the dependency graph.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B knowntypes
 [action_options]
@@ -22,11 +22,11 @@ In particular, for a given component type 'type1@cat1', if two rules A
 and B applies on it, then the upper in the rules graph will be applied
 first. For example, if A depends on B, then only A will be applied on
 a component of type 'type1@cat1' if that component is given on the
-command line to the the clmsequencer. For example, consider the
+command line to the the sequencer. For example, consider the
 following command line:
 
 .EX
-clmsequencer myruleset c1#type1@cat1 c2#type2@cat2
+sequencer myruleset c1#type1@cat1 c2#type2@cat2
 .EE
 
 Rule A will be applied on both c1 and c2. Hovewer, if the depsfinder
@@ -49,30 +49,30 @@ if OK,
 if something went wrong.
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .TP
 .B CONFDIR/*.rs
 Ruleset files. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH EXAMPLE
 Known types for the 'stop' ruleset
 .RS 4
 .EX
-$ clmsequencer knowntypes stop
+$ sequencer knowntypes stop
 .EE
 .RE
 
 .SH "SEE ALSO"
 .SS "Sequencer"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH "COPYRIGHT"
 Copyright [\co] 2010 Bull S.A.S. License GPLv3+: GNU GPL version 3 or
 later <http://gnu.org/licenses/gpl.html>.

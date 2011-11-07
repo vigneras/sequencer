@@ -3,10 +3,10 @@
 .\"
 .TH depmake 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer depmake \- Create the dependency graph for the components
+sequencer depmake \- Create the dependency graph for the components
 specified and for a given ruleset.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B depmake
 [action_options]
@@ -16,7 +16,7 @@ The
 .B depmake
 action invokes the Dependency Graph Maker (DGM) which is the first
 stage of the
-.BR clmsequencer (1).
+.BR sequencer (1).
 For the
 .I components_list
 specified, it creates the dependency graph from the given
@@ -35,7 +35,7 @@ should have the following format:
 .B component_name[range][#type][@category]
 
 See
-.BR clmguesser (1)
+.BR guesser (1)
 for details on this notation.
 
 The given
@@ -265,20 +265,20 @@ if something went wrong.
 
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 
 .TP
 .B CONFDIR/*.rs
 Ruleset files. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 
 .SH EXAMPLE
 
@@ -288,14 +288,14 @@ clusterdb) and components RACK1 and RACK2 (the category is unset, the
 component type will be guessed by the sequencer).
 .RS 4
 .EX
-$ clmsequencer depmake stop bullx-[100-200]@node RACK[1-2]
+$ sequencer depmake stop bullx-[100-200]@node RACK[1-2]
 .EE
 .RE
 
 Same thing but be verbose and output the result to /tmp/stop.depmake.xml
 .RS 4
 .EX
-$ clmsequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
+$ sequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
                -o /tmp/stop.depmake.xml
 .EE
 .RE
@@ -303,13 +303,13 @@ $ clmsequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
 Same thing but generate also a DOT format graph in /tmp/stop.graph.dot.
 .RS 4
 .EX
-$ clmsequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
+$ sequencer -v depmake stop bullx-[100-200]@node RACK[1-2] \\
                -o /tmp/stop.depmake.xml \\
                --depgraphto=/tmp/stop.graph.dot
 .EE
 .RE
 .SH "SEE ALSO"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net

@@ -23,7 +23,7 @@ This package defines exceptions specific to the DGM.
 Note that exceptions from the standard python library can still be thrown.
 """
 
-from clmsequencer.commons import SequencerError, get_version
+from sequencer.commons import SequencerError, get_version
 
 __author__ = "Pierre Vigneras"
 __copyright__ = "Copyright (c) 2010 Bull S.A.S."

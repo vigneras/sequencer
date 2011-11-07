@@ -20,14 +20,14 @@
 ###############################################################################
 
 """
-Convert clmsequencer db-based ruleset format to new file-based one.
+Convert sequencer db-based ruleset format to new file-based one.
 """
 import optparse
 import os, sys
 
-from clmsequencer.commons import get_tracer, get_db_connection
-from clmsequencer.dgm.db import SequencerFileDB, SequencerSQLDB
-from clmsequencer.ise.rc import ACTION_RC_OK
+from sequencer.commons import get_tracer, get_db_connection
+from sequencer.dgm.db import SequencerFileDB, SequencerSQLDB
+from sequencer.ise.rc import ACTION_RC_OK
 
 
 __author__ = "Pierre Vigneras"

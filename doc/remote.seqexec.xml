@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 
+<!--
    $Id: remote.seqexec.xml,v 1.1 2010/10/05 13:28:39 vigneras Exp $
 
    This example shows the effect of the remote attribute.
@@ -9,14 +9,14 @@
 
 <instructions
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
-		       /usr/share/clmsequencer/ise.xsd"
-   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+   xsi:schemaLocation="http://www.xml.bcm.bull/sequencer/ise
+		       /usr/share/sequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/sequencer/ise">
 
   <!-- Password-less SSH-ing to host1, host3 and host3 should be
        possible for this action to work! -->
-  <action id="RemoteHW" 
-          desc="The Hello World Example: remote!" 
+  <action id="RemoteHW"
+          desc="The Hello World Example: remote!"
           component_set="host[1-3]#dummy"
           remote="true">
     echo "Hello World! at $HOSTNAME"

@@ -1,11 +1,11 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH clmsequencer.ism 5 "August 2010" bullx "Sequencer Manual"
+.TH sequencer.ism 5 "August 2010" bullx "Sequencer Manual"
 .SH ISM Input File Format
 ISM Input File Format \- Instructions Sequence Maker File Format.
 .SH DESCRIPTION
-.BR clmsequencer.ism (1)
+.BR sequencer.ism (1)
 computes a sequence of instructions from a dependency graph specified
 in an XML input file.
 
@@ -17,7 +17,7 @@ A dependency graph is defined by the <digraph> XML tag.  Inside a
 dependency graph, components are specified by the <node> tag. A node
 should have a mandatory 'id' attribute of the
 form 'name#type@category' (see
-.BR clmguesser (1)
+.BR guesser (1)
 for details on this notation). Actions for a given component are
 specified using an <attribute> tag. This tag should have the following
 attributes:
@@ -49,10 +49,10 @@ The component 'id' on which the dependency is expressed.
 As required by the pygraph library.
 
 .SH EXAMPLES
-The clmsequencer package provides some examples at the following location:
-/usr/share/doc/clmsequencer/
+The sequencer package provides some examples at the following location:
+/usr/share/doc/sequencer/
 .SH "SEE ALSO"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net

@@ -20,7 +20,7 @@
 """
 Test the ISM Algorithm
 """
-from clmsequencer.ism.algo import order_mixed
+from sequencer.ism.algo import order_mixed
 from pygraph.classes.digraph import digraph
 
 from tests.ism.abstracttest import AbstractISMAlgo

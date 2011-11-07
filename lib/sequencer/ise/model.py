@@ -25,9 +25,9 @@ from __future__ import print_function
 import uuid
 from logging import getLogger
 
-from clmsequencer.commons import InternalError, CyclesDetectedError, get_version
-from clmsequencer.ise import parser
-from clmsequencer.ise.errors import BadDepError, UnknownDepsError
+from sequencer.commons import InternalError, CyclesDetectedError, get_version
+from sequencer.ise import parser
+from sequencer.ise.errors import BadDepError, UnknownDepsError
 from pygraph.algorithms.cycles import find_cycle
 from pygraph.classes.digraph import digraph
 from pygraph.classes.exceptions import AdditionError

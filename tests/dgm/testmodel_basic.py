@@ -20,8 +20,8 @@
 """
 Test the DGM Model
 """
-from clmsequencer.dgm.errors import UnknownDepError
-from clmsequencer.dgm.model import RuleSet, Component, ALL, NONE, AllFilter, NoneFilter, ReFilter, ScriptFilter, FullType
+from sequencer.dgm.errors import UnknownDepError
+from sequencer.dgm.model import RuleSet, Component, ALL, NONE, AllFilter, NoneFilter, ReFilter, ScriptFilter, FullType
 
 import tests.dgm.tools as tools
 from tests.commons import BaseTest

@@ -3,10 +3,10 @@
 .\"
 .TH chain 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer chain \- Compute the dependency graph, create the
+sequencer chain \- Compute the dependency graph, create the
 instruction sequence and then execute it directly.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .RB [ chain ]
 .I ruleset
@@ -15,7 +15,7 @@ instruction sequence and then execute it directly.
 .SH DESCRIPTION
 The
 .B chain
-clmsequencer command transparently executes
+sequencer command transparently executes
 .BR depmake (1),
 .BR seqmake (1)
 and
@@ -24,9 +24,9 @@ in a way that is roughly equivalent to the following shell commands:
 
 .RS 4
 .EX
-# clmsequencer depmake <ruleset> components_list |\\
-  clmsequencer seqmake | \\
-  clmsequencer seqexec
+# sequencer depmake <ruleset> components_list |\\
+  sequencer seqmake | \\
+  sequencer seqexec
 .EE
 .RE
 
@@ -40,14 +40,14 @@ Note that the action name
 .B chain
 is not required if the
 .I ruleset
-name does not conflict with any clmsequencer action (see
-.BR clmsequencer (1)
+name does not conflict with any sequencer action (see
+.BR sequencer (1)
 for the list of actions). Therefore, the following commands:
 
 .RS 4
 .EX
-# clmsequencer chain stop bullx[3-10]
-# clmsequencer stop bullx[3-10]
+# sequencer chain stop bullx[3-10]
+# sequencer stop bullx[3-10]
 .EE
 .RE
 
@@ -61,7 +61,7 @@ action to fetch a more detailed list (see
 The given
 .I components_list
 should conform to the components list specification described in
-.BR clmguesser (1).
+.BR guesser (1).
 
 .SH OPTIONS
 .TP
@@ -172,21 +172,21 @@ In the last case, the code returned is the one specified by
 action.
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .TP
 .B CONFDIR/*.rs
 Ruleset files. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .TP
-.B clmsequencer/ise/ise.xsd
+.B sequencer/ise/ise.xsd
 The
 .BR seqexec (5)
 input XML schema.
@@ -199,14 +199,14 @@ To stop all (hardware) components from RACK-2 and RACK-3 and NFS
 
 .RS 4
 .EX
-# clmsequencer stop RACK-[2-3] io-[2-5]#nfs@soft
+# sequencer stop RACK-[2-3] io-[2-5]#nfs@soft
 .EE
 .RE
 
 The same command with a progress report of 1 second
 .RS 4
 .EX
-# clmsequencer stop RACK-[2-3] io-[2-5]#nfs@soft \\
+# sequencer stop RACK-[2-3] io-[2-5]#nfs@soft \\
                --progress=1
 .EE
 .RE
@@ -214,7 +214,7 @@ The same command with a progress report of 1 second
 Use the verbose option, report everything including statistics
 .RS 4
 .EX
-# clmsequencer --verbose stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+# sequencer --verbose stop  RACK-[2-3] io-[2-5]#nfs@soft \\
                --report=all \\
                --dostats=yes
 .EE
@@ -224,7 +224,7 @@ Use the 'seq' algorithm instead of default 'optimal'. This will execute
 instructions sequentially.
 .RS 4
 .EX
-# clmsequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+# sequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
                 --algo=seq
 .EE
 .RE
@@ -233,7 +233,7 @@ Do not execute, but produces both components dependency graph and
 actions dependency graphs for manual checking.
 .RS 4
 .EX
-# clmsequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
+# sequencer stop  RACK-[2-3] io-[2-5]#nfs@soft \\
                 --doexec=no \\
                 --depgraphto=/tmp/depgraph.dot \\
                 --actionsgraphto=/tmp/actionsgraph.dot
@@ -242,7 +242,7 @@ actions dependency graphs for manual checking.
 
 .SH "SEE ALSO"
 .SS "Sequencer"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SS "Sequencer ISE Input Formats"
 .BR seqexec (5)
 .SH AUTHOR

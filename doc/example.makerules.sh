@@ -42,11 +42,11 @@
 # $ dbm-sequencer -b cdbpv remove test
 # Remove all rules from the 'test' ruleset in the cdbpv database
 # Then:
-# $ /usr/share/doc/clmsequencer/example.makerules.sh -b cdbpv test
+# $ /usr/share/doc/sequencer/example.makerules.sh -b cdbpv test
 # Insert rules into the database. Watch them with:
 # $ dbm-sequencer -b cdbpv show
 # Finally, you can run an execution on (virtual) components: 'a' and 'd':
-# $ clmsequencer  test -b cdbpv a#doubledep@soft d#doubledep@soft
+# $ sequencer  test -b cdbpv a#doubledep@soft d#doubledep@soft
 
 # Different ordering algorithms are available: use the option --algo
 # along with the --stats to see that different algorithms provide
@@ -98,11 +98,11 @@ fi
 ruleset=$1
 
 echo "Adding rules to ruleset: $ruleset"
-clmsequencer  dbadd $ruleset R0be leaf@soft ALL "echo component: %name; sleep 1" NONE NONE "Rule for leaves b and e"
-clmsequencer  dbadd $ruleset R1c singledep@soft "bash -c '[[ %id =~ ^c#.* ]]'" "echo type: %type;sleep 2;" "echo e#leaf@soft" R0be  "Filter using a script (bash builtin here)"
-clmsequencer  dbadd $ruleset R1f singledep@soft "%name =~ f" "echo ruleset: %ruleset;sleep 4;exit 75" "echo b#leaf@soft" R0be  "Returns a WARNING code (=75)"
-clmsequencer  dbadd $ruleset R2a doubledep@soft "%id =~ ^a#.*" "echo rulename: %rulename;sleep 4;" "echo -e 'b#leaf@soft\nc#singledep@soft'" R0be,R1c  "Depsfinder: one component per line."
-clmsequencer  dbadd $ruleset R2d doubledep@soft "%id =~ ^d#.*" "echo id: %id;sleep 2;" "echo -e 'e#leaf@soft\nf#singledep@soft'" R0be,R1f  "Filter using regexp."
+sequencer  dbadd $ruleset R0be leaf@soft ALL "echo component: %name; sleep 1" NONE NONE "Rule for leaves b and e"
+sequencer  dbadd $ruleset R1c singledep@soft "bash -c '[[ %id =~ ^c#.* ]]'" "echo type: %type;sleep 2;" "echo e#leaf@soft" R0be  "Filter using a script (bash builtin here)"
+sequencer  dbadd $ruleset R1f singledep@soft "%name =~ f" "echo ruleset: %ruleset;sleep 4;exit 75" "echo b#leaf@soft" R0be  "Returns a WARNING code (=75)"
+sequencer  dbadd $ruleset R2a doubledep@soft "%id =~ ^a#.*" "echo rulename: %rulename;sleep 4;" "echo -e 'b#leaf@soft\nc#singledep@soft'" R0be,R1c  "Depsfinder: one component per line."
+sequencer  dbadd $ruleset R2d doubledep@soft "%id =~ ^d#.*" "echo id: %id;sleep 2;" "echo -e 'e#leaf@soft\nf#singledep@soft'" R0be,R1f  "Filter using regexp."
 
 
 

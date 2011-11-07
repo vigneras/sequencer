@@ -18,11 +18,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-The main clmsequencer package.
+The main sequencer package.
 """
 
-# Read the clmsequencer.tracer module so logging is configured
+# Read the sequencer.tracer module so logging is configured
 # properly. In particular, the OUTPUT level should be set.
-import clmsequencer.tracer
+import sequencer.tracer
 
 

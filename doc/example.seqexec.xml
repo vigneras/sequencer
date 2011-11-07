@@ -1,31 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 
+<!--
    $Id: example.seqexec.xml,v 1.1 2010/10/05 13:28:39 vigneras Exp $
 
    An example of an Instructions Sequence Executor (ISE) input file.
 
    This example does not produce any side effect.
    Actions are just sleeping for some random time between 1 and 5 seconds
-      
-   This example shows how implicit dependencies (seq tag), parallelism (par tag) 
+
+   This example shows how implicit dependencies (seq tag), parallelism (par tag)
    and explicit dependencies (deps attribute)
 
    Execute this file with the following command:
 
-   clmsequencer seqexec -f <this_file>
+   sequencer seqexec -f <this_file>
 
-   See clmsequencer documentation for details.
+   See sequencer documentation for details.
 
   -->
 
 <instructions
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://www.xml.bcm.bull/clmsequencer/ise
-		       /usr/share/clmsequencer/ise.xsd"
-   xmlns="http://www.xml.bcm.bull/clmsequencer/ise">
+   xsi:schemaLocation="http://www.xml.bcm.bull/sequencer/ise
+		       /usr/share/sequencer/ise.xsd"
+   xmlns="http://www.xml.bcm.bull/sequencer/ise">
 
-  <!-- 
+  <!--
        The instruction 'par' defines a set of inner intructions that
        *can* be executed in parallel. Note that this is not
        mandatory. A sequential execution is also a valid
@@ -35,8 +35,8 @@
   <par>
     <!-- The instruction 'action' defines a command that should be
          executed. Eeach action *must* have a unique id. The ISE
-         parser will ensure this constraint is respected. 
-         
+         parser will ensure this constraint is respected.
+
          This action generate a random number between 1 and 5 and
          sleep for that amount of seconds.
     -->
@@ -47,19 +47,19 @@
          that *must* be executed in sequence. Dependencies are
          implicit in that the order specified is respected. First
          instruction will get executed first, then second, and so on.
-         
+
          This instruction specifies that action '2' must be executed
          before action '5'.
     -->
     <seq>
 
       <!-- Each 'desc' attribute will be used for logging when the
-           'verbose' option is passed to 'clmsequencer'.  When unset,
+           'verbose' option is passed to 'sequencer'.  When unset,
            desc will be automatically set to "Description unset" in
-           the model. 
-           
-           Other action attributes are: 
-           
+           the model.
+
+           Other action attributes are:
+
            - component_set: the set of components (hardware or
            software) this action has an effect on. Examples:
            node[10-20]#compute. When unset, it defaults to
@@ -87,17 +87,17 @@
         n=$((1+$RANDOM%5))  bash -c 'echo "Sleeping for $n";sleep $n'
       </action>
     </seq>
-    
+
     <!-- Here action '4' exits with the WARNING code (defined by
          python os.EX_TEMPFAIL which can be found usually in
          sysexits.h as 75). WARNING are treated as error unless the
          option 'force' is used. In the case of error, any action that
          depends on a failed executed action will *not* get executed.
-         
+
          In this example, action '5' will not be executed unless you
          specify the 'force' option.
     -->
-    <seq>    
+    <seq>
       <action id="4" desc="Returning WARNING is considered an error unless 'force' is 'true'">
         n=$((1+$RANDOM%5)) bash -c 'echo "Sleeping for $n";sleep $n;echo "Error generated!" >&amp;2;exit 75'
       </action>
@@ -105,11 +105,11 @@
         n=$((1+$RANDOM%5))  bash -c 'echo "Sleeping for $n";sleep $n'
       </action>
     </seq>
-    
+
     <!-- Here action '8' depends (implicitely) on both action '6' and
          '7'. Since '7' exits with the WARNING code, '8' should not
          get executed unless 'force' is 'true'.
-         
+
          Note however that '6' and '7' can be executed in parallel.
     -->
     <seq>
@@ -129,9 +129,9 @@
     <!-- Complex example. Have a look to the dependency graph to get
          the picture of what should be going on depending on 'force'
          option value.
-         
+
          Generating the graph can be done using the 'graphto' option
-         of 'clmsequencer seqexec'. Displaying that generated graph
+         of 'sequencer seqexec'. Displaying that generated graph
          can be done using the Graphviz 'dotty' command.
     -->
     <par>
@@ -162,5 +162,5 @@
         </action>
       </seq>
     </par>
-  </par>   
+  </par>
 </instructions>

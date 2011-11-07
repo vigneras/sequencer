@@ -22,10 +22,10 @@ from __future__ import print_function
 import tempfile
 
 import lxml.etree
-from clmsequencer.commons import CyclesDetectedError, output_graph
-from clmsequencer.ise.errors import UnknownDepsError, BadDepError
-from clmsequencer.ise import model
-from clmsequencer.ise.parser import ISE,SEQ,PAR,ACTION
+from sequencer.commons import CyclesDetectedError, output_graph
+from sequencer.ise.errors import UnknownDepsError, BadDepError
+from sequencer.ise import model
+from sequencer.ise.parser import ISE,SEQ,PAR,ACTION
 
 from tests.ise.tools import AssertModel
 

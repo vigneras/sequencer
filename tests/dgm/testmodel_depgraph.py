@@ -20,7 +20,7 @@
 """
 Test the DGM Model
 """
-from clmsequencer.dgm.model import RuleSet, Component
+from sequencer.dgm.model import RuleSet, Component
 
 import tests.dgm.tools as tools
 from tests.commons import BaseGraph

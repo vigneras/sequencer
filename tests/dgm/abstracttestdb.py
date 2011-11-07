@@ -23,7 +23,7 @@ Test the SequencerDB API
 import random
 
 import tests.dgm.tools as tools
-from clmsequencer.commons import UnknownRuleSet
+from sequencer.commons import UnknownRuleSet
 
 _DELETE_TMP_FILE = True
 

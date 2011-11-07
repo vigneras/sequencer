@@ -26,9 +26,9 @@ import os
 from ConfigParser import RawConfigParser
 from os import path
 
-from clmsequencer.commons import get_version, UnknownRuleSet, \
+from sequencer.commons import get_version, UnknownRuleSet, \
      SequencerError, replace_if_none, NONE_VALUE
-from clmsequencer.dgm.model import Rule
+from sequencer.dgm.model import Rule
 
 
 __author__ = "Pierre Vigneras"

@@ -24,8 +24,8 @@ import tempfile
 import unittest
 
 import lxml
-from clmsequencer.ise import parser
-from clmsequencer.ise.parser import ISE, SEQ, PAR, ACTION
+from sequencer.ise import parser
+from sequencer.ise.parser import ISE, SEQ, PAR, ACTION
 
 
 class TestISEParserBasic(unittest.TestCase):

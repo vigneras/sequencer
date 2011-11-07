@@ -18,9 +18,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
 """
-Command Line Interface (CLI) of the ISM clmsequencer.
+Command Line Interface (CLI) of the ISM sequencer.
 
-This command is the front end for the clmsequencer ISM stage.
+This command is the front end for the sequencer ISM stage.
 
 It basically parse a DGM output file (a python graph) and produces an
 ISE XML input file.
@@ -32,8 +32,8 @@ import sys
 from logging import getLogger
 from os import EX_OK
 
-from clmsequencer.commons import get_version, add_options_to
-from clmsequencer.ism.algo import order_mixed, \
+from sequencer.commons import get_version, add_options_to
+from sequencer.ism.algo import order_mixed, \
     order_seq_only, order_par_only, order_optimal
 from lxml import etree as ET
 from pygraph.readwrite.markup import read

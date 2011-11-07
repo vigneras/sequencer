@@ -23,7 +23,7 @@ srcrpmdir	:= $(shell rpm --eval="%_srcrpmdir")
 sourcedir	:= $(shell rpm --eval="%_sourcedir")
 
 # TODO: specify your spec file here
-specfile=clmsequencer.spec
+specfile=sequencer.spec
 
 # For release target (rt_)
 # TODO: you may change that. See Bullforge files for examples.
@@ -44,7 +44,7 @@ files=$(specfile) conf bin lib doc
 files_list_to_tag=.
 #files_list_to_tag=$(files) $(current_makefile)
 
-man_files_core=clmsequencer.dgmdb.1 dgmdb.1 clmsequencer.1 clmsequencer.graphrules.1 clmsequencer.knowntypes.1 clmsequencer.depmake.1 clmsequencer.seqmake.1 clmsequencer.seqmake.5 clmsequencer.seqexec.1 clmsequencer.seqexec.5 clmsequencer.chain.1
+man_files_core=sequencer.dgmdb.1 dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
 man_alias=graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1
 man_files=$(man_files_core) $(man_alias)
 
@@ -107,7 +107,7 @@ log: mkdir
 	git --no-pager log --format="%ai %aN %n%n%x09* %s%d%n" > /tmp/$(USER)/$(pkg_dir)/doc/ChangeLog
 
 version: mkdir
-	@echo "$(name).version = $(version).$(release)" > /tmp/$(USER)/$(pkg_dir)/lib/clmsequencer/.version
+	@echo "$(name).version = $(version).$(release)" > /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.version
 
 man: copy
 	@for i in $(man_files);do \
@@ -179,10 +179,10 @@ test:
 	@nosetests
 
 coverage:
-	@nosetests --with-coverage --cover-html --cover-html-dir=unpackaged/tests-report/ --cover-package=clmsequencer
+	@nosetests --with-coverage --cover-html --cover-html-dir=unpackaged/tests-report/ --cover-package=sequencer
 
 pylint:
-	@PYTHONPATH=${PYTHONPATH}:lib pylint -i y -r n -f colorized --rcfile=unpackaged/pylint.rc clmsequencer bin/clmsequencer bin/clmguesser bin/dbm-sequencer bin/clmcomptype bin/clusterctrl bin/gen_ise_input
+	@PYTHONPATH=${PYTHONPATH}:lib pylint -i y -r n -f colorized --rcfile=unpackaged/pylint.rc sequencer bin/sequencer bin/guesser bin/dbm-sequencer bin/comptype bin/clusterctrl bin/gen_ise_input
 
 sloc:
 	@sloccount --wide  lib tests bin

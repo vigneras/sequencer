@@ -1,12 +1,12 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH clmsequencer 1 "August 2010" bullx "Sequencer Manual"
+.TH sequencer 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer \- Compute and execute a sequence of dependent
+sequencer \- Compute and execute a sequence of dependent
 instructions for a set of hardware and software components.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B <action>
 [action_options]
@@ -44,7 +44,7 @@ instructions for a set of hardware and software components.
 .B <ruleset>
 
 .SH DESCRIPTION
-.B clmsequencer
+.B sequencer
 is used to compute and execute a sequence of dependent instructions
 for a set of hardware and software components.
 
@@ -72,7 +72,7 @@ like in the following command:
 
 .RS 8
 .EX
-# clmsequencer stop rack[1-10]
+# sequencer stop rack[1-10]
 .EE
 .RE
 
@@ -81,15 +81,15 @@ computes the dependency graph, creates an instructions sequence and
 finally executes the corresponding set of actions.
 
 Rulesets are usually grouped into specific commands using symbolic
-links to the clmsequencer command. For example, defining a new group
-of rulesets is done by linking the clmsequencer command to a new
+links to the sequencer command. For example, defining a new group
+of rulesets is done by linking the sequencer command to a new
 command name, say, 'newcmd', using that new command name to create
 rulesets, and finally executing actions with this new command as in
 the following example:
 
 .RS 8
 .EX
-# ln -s $(which clmsequencer) /usr/sbin/newcmd
+# ln -s $(which sequencer) /usr/sbin/newcmd
 # /usr/sbin/newcmd dbcreate
 # /usr/sbin/newcmd dbadd stop rule1 ....
 # /usr/sbin/newcmd dbadd stop rule2 ....
@@ -105,7 +105,7 @@ its options and parameters.
 
 
 .SH ACTIONS
-The clmsequencer understand the following actions:
+The sequencer understand the following actions:
 
 .TP
 .B - graphrules
@@ -144,7 +144,7 @@ The action name
 .B chain
 is not required: if the given
 .I ruleset
-does not conflict with one of the known clmsequencer actions listed above,
+does not conflict with one of the known sequencer actions listed above,
 .B chain
 is automatically selected.
 .br
@@ -154,14 +154,14 @@ is roughly equivalent to:
 .RS 8
 
 .EX
-$ clmsequencer depmake ruleset <components...> |\\
-  clmsequencer seqmake | \\
-  clmsequencer seqexec
+$ sequencer depmake ruleset <components...> |\\
+  sequencer seqmake | \\
+  sequencer seqexec
 .EE
 .RE
 
 .SH OPTIONS
-There are two levels of options for the clmsequencer:
+There are two levels of options for the sequencer:
 .IP - 2
 .B Global Options:
 are specified before the action
@@ -205,7 +205,7 @@ Display all level messages on output.
 .BI \-\-dir= "DIR"
 .br
 Specify the configuration directory. Default:
-/etc/clmsequencer/<cmd>. where <cmd> is the current command name.
+/etc/sequencer/<cmd>. where <cmd> is the current command name.
 .TP
 .BI \-b " BASE"
 .TQ
@@ -250,7 +250,7 @@ For action options, see specific action man pages:
 or use the '--help' action option as in:
 
 .EX
-$ clmsequencer seqexec --help
+$ sequencer seqexec --help
 .EE
 
 .SH EXIT STATUS
@@ -263,18 +263,18 @@ if OK,
 Otherwise, depending on the actual action specified.
 
 .SH FILES
-The clmsequencer fetches its data from its
+The sequencer fetches its data from its
 .I configuration directory
 refered to by CONFDIR in the following. By default, CONFDIR is of the
 form:
 .EX
-/etc/clmsequencer/<cmd>
+/etc/sequencer/<cmd>
 .EE
 where <cmd> is the actual command name. For example, if
-/usr/bin/seqtest is a symbolic link on /usr/sbin/clmsequencer, the
+/usr/bin/seqtest is a symbolic link on /usr/sbin/sequencer, the
 configuration directory of the seqtest command is
 .EX
-CONFDIR=/etc/clmsequencer/seqtest
+CONFDIR=/etc/sequencer/seqtest
 .EE
 
 The configuration directory can also be explicitely specified using
@@ -316,7 +316,7 @@ form 'key=value' actually represents 'rule.key=value'. The dependency
 table is thus implemented by several such ruleset files.
 .SH "SEE ALSO"
 .SS "Components List Specification"
-.BR clmguesser (1)
+.BR guesser (1)
 .SS "Sequencer Dependency Graph Maker Database Management"
 .BR dgmdb (1)
 .SS "Sequencer Actions"
@@ -339,8 +339,8 @@ table is thus implemented by several such ruleset files.
 Dependency Graph Visualisation Tool:
 .BR dotty (1)
 .br
-For the clmsequencer Python API, execute:
-.B 'pydoc clmsequencer'
+For the sequencer Python API, execute:
+.B 'pydoc sequencer'
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net

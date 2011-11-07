@@ -20,9 +20,9 @@
 import os
 import re
 
-from clmsequencer.ise.rc import ACTION_RC_OK
-from clmsequencer.ise import model
-from clmsequencer.ise.parser import ACTION
+from sequencer.ise.rc import ACTION_RC_OK
+from sequencer.ise import model
+from sequencer.ise.parser import ACTION
 from tests.commons import BaseTest
 
 

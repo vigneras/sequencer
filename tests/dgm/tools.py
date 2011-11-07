@@ -23,7 +23,7 @@ Various Tools for the DB DGM API
 import os
 import sqlite3
 
-from clmsequencer.dgm.model import Rule, ALL
+from sequencer.dgm.model import Rule, ALL
 
 from tests.commons import BaseTest
 

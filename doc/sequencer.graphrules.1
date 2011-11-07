@@ -3,10 +3,10 @@
 .\"
 .TH graphrules 1 "August 2010" bullx "Sequencer Manual"
 .SH NAME
-clmsequencer graphrules \- produce a DOT format graph representing the
+sequencer graphrules \- produce a DOT format graph representing the
 dependencies between rules of a given ruleset.
 .SH SYNOPSIS
-.B clmsequencer
+.B sequencer
 [global_options]
 .B graphrules
 [action_options]
@@ -46,38 +46,38 @@ if OK,
 if something went wrong.
 .SH FILES
 In the following, CONFDIR is the configuration directory. Default is
-/etc/clmsequencer/<cmd>/. See section
+/etc/sequencer/<cmd>/. See section
 .B FILES
 of
-.BR clmsequencer (1)
+.BR sequencer (1)
 for details.
 .TP
 .B CONFDIR/config
 The general sequencer configuration file. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .TP
 .B CONFDIR/*.rs
 Ruleset files. See
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH EXAMPLE
 
 Graph rules for the 'stop' ruleset
 .RS 4
 .EX
-$ clmsequencer graphrules stop
+$ sequencer graphrules stop
 .EE
 .RE
 
 Same thing but write out the result to the /tmp/stop.graph.dot
 .RS 4
 .EX
-$ clmsequencer graphrules stop -o /tmp/stop.graph.dot
+$ sequencer graphrules stop -o /tmp/stop.graph.dot
 .EE
 .RE
 
 .SH "SEE ALSO"
 .SS "Sequencer"
-.BR clmsequencer (1)
+.BR sequencer (1)
 .SH AUTHOR
 Pierre Vigneras
 .UR pierre.vigneras@\:bull.net
