@@ -22,12 +22,12 @@
 
 # For versionning policy, please see wiki:
 # TODO: define
-%define version 5.1
+%define version 1.0
 
 # Using the .snapshot suffix helps tagging process.
 # Tagging process is defined here:
 # TODO: define
-%define release 1%{?dist}.snapshot
+%define release 0%{?dist}.snapshot
 
 %define src_dir %{name}-%{version}
 %define src_tarall %{src_dir}.tar.gz
