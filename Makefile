@@ -44,8 +44,8 @@ files=$(specfile) conf bin lib doc
 files_list_to_tag=.
 #files_list_to_tag=$(files) $(current_makefile)
 
-man_files_core=sequencer.dgmdb.1 dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
-man_alias=graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1
+man_files_core=sequencer.dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
+man_alias=graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1 dgmdb.1
 man_files=$(man_files_core) $(man_alias)
 
 
@@ -182,7 +182,7 @@ coverage:
 	@nosetests --with-coverage --cover-html --cover-html-dir=unpackaged/tests-report/ --cover-package=sequencer
 
 pylint:
-	@PYTHONPATH=${PYTHONPATH}:lib pylint -i y -r n -f colorized --rcfile=unpackaged/pylint.rc sequencer bin/sequencer bin/guesser bin/dbm-sequencer bin/comptype bin/clusterctrl bin/gen_ise_input
+	@PYTHONPATH=${PYTHONPATH}:lib pylint -i y -r n -f colorized --rcfile=unpackaged/pylint.rc sequencer bin/sequencer
 
 sloc:
 	@sloccount --wide  lib tests bin
