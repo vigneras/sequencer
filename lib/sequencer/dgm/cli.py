@@ -252,7 +252,7 @@ def _parse_depmake_cmdline(config, args):
 
 def get_component_set_from(config, components_lists):
     """
-    Use the CLMGuesser API to fetch the components set from the given
+    Use the Guesser API to fetch the components set from the given
     components_lists
     """
     all_set = set()
