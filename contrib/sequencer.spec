@@ -22,7 +22,7 @@
 
 # For versionning policy, please see wiki:
 # TODO: define
-%define version 1.0
+%define version 1.0.0
 
 # Using the .snapshot suffix helps tagging process.
 # Tagging process is defined here:
