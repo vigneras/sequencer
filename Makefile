@@ -68,7 +68,7 @@ copy: mkdir doc
 log: copy
 	git --no-pager log --format="%ai %aN %n%n%x09* %s%d%n" > /tmp/$(USER)/$(pkg_dir)/doc/ChangeLog
 
-version: mkdir
+version: copy
 	@echo "$(name).version = $(version)" > /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.version
 
 man: copy
@@ -83,9 +83,8 @@ pdfman:
 	done
 
 tar: version man
-	tar --exclude CVS --exclude '*~' --exclude '#*#' -C /tmp/$(USER) --owner=root --group=root -cvzf archives/$(tarall) $(pkg_dir)
+	tar --exclude-vcs --exclude '*~' --exclude '#*#' -C /tmp/$(USER) --owner=root --group=root -cvzf archives/$(tarall) $(pkg_dir)
 	@echo "INFO: tar OK"
-
 
 test:
 	@echo "*****************************************************************************"
