@@ -49,9 +49,9 @@ def get_package_name():
     return _PACKAGE_NAME
 
 
-_CLMSEQUENCER_VERSION_FILE = ".version"
-_CLMSEQUENCER_VERSION_PREFIX = get_package_name() + ".version"
-_MISSING_VERSION_MSG = "?.?-Bull.?"
+_SEQUENCER_VERSION_FILE = ".version"
+_SEQUENCER_VERSION_PREFIX = get_package_name() + ".version"
+_MISSING_VERSION_MSG = "?.?.?"
 
 # TODO: UNIX Only -> how to change it for Windows user?
 CONFDIR_STARTING_POINT = '/etc/'  + get_package_name()
@@ -264,19 +264,17 @@ def td_to_seconds(delta):
 
 def get_version():
     """
-
-    Returns the version of the whole sequencer software. The actual
-    version is registered into the _CLMSEQUENCER_VERSION_FILE. The
-    content of this version_file is generated during the build phase (make).
-
+    Returns the version of the sequencer software. The actual version
+    is registered into the _SEQUENCER_VERSION_FILE. The content of this
+    file should be generated during the packaging phase (make).
     """
 
     currentdir = os.path.dirname(__file__)
-    version_file_name = os.path.join(currentdir, _CLMSEQUENCER_VERSION_FILE)
+    version_file_name = os.path.join(currentdir, _SEQUENCER_VERSION_FILE)
     try:
         with open(version_file_name, "r") as version_file:
             for line in version_file:
-                if line.startswith(_CLMSEQUENCER_VERSION_PREFIX):
+                if line.startswith(_SEQUENCER_VERSION_PREFIX):
                     version = line.rpartition('=')[2]
                     return version.strip()
         _LOGGER.error("Corrupted file %s", version_file_name)
