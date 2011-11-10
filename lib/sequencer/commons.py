@@ -625,7 +625,7 @@ def remove_leaves(graph, leaves):
 def write_graph_to(graph, file_name):
     """
     Write the given graph to the given file_name. If 'file_name' ==
-    '-', prints to stdout (using tracer.output())
+    '-', prints to stdout (using logger.output())
     """
     nodes = graph.nodes()
     for node in nodes:
@@ -640,11 +640,11 @@ def write_graph_to(graph, file_name):
 
     dot = output_graph(graph)[1]
     if file_name == '-':
-        _TRACER.output(dot)
+        _LOGGER.output(dot)
     else:
         a_file = open(file_name, "w")
         print(dot, file=a_file)
-        _TRACER.debug("Graph written to %s", file_name)
+        _LOGGER.debug("Graph written to %s", file_name)
 
 class SequencerError(Exception):
     """

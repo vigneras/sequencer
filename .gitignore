@@ -1,7 +1,9 @@
-/.coverage
-/archives
-/cover
 *.pyc
 *~
 .#*#
+/.coverage
+/archives
+/build
+/cover
+/dist
 \#*#
