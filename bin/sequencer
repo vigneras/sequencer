@@ -51,13 +51,14 @@ import os, sys
 import resource
 
 import sequencer
+from sequencer.tracer import init_trace
 from sequencer.chain import cli as chain_cli
 from sequencer.commons import get_package_name, get_version, get_basedir
 from sequencer.dgm import cli as dgm_cli
 from sequencer.dgm.db import SequencerFileDB
 from sequencer.ise import cli as ise_cli
 from sequencer.ism import cli as ism_cli
-from sequencer.tracer import init_trace
+
 
 
 __author__ = "Pierre Vigneras"
@@ -66,8 +67,7 @@ __credits__ = ["Pierre Vigneras"]
 __version__ = get_version()
 
 # Use the module name instead of a hardwired string in case the module
-# name change (e.g: from sequencer to sequencer when it will become
-# open-source.
+# name change
 _logger = logging.getLogger(sequencer.__name__)
 
 def tab(count=1):

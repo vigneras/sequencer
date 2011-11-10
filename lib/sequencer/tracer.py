@@ -148,8 +148,7 @@ def init_trace(options):
     """
 
     # Use the module name instead of a hardwired string in case the module
-    # name change (e.g: from sequencer to sequencer when it will become
-    # open-source.
+    # name change
     root_logger = logging.getLogger(sequencer.__name__)
     # By default, filelog_level is infinity: we do not log unless
     # specified
