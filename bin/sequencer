@@ -53,7 +53,7 @@ import resource
 import sequencer
 from sequencer.tracer import init_trace
 from sequencer.chain import cli as chain_cli
-from sequencer.commons import get_package_name, get_version, get_basedir
+from sequencer.commons import get_package_name, get_version, get_basedir, get_lastcommit
 from sequencer.dgm import cli as dgm_cli
 from sequencer.dgm.db import SequencerFileDB
 from sequencer.ise import cli as ise_cli
@@ -240,8 +240,15 @@ def main():
     init_trace(options)
 
     if (options.version):
-        _logger.output(get_package_name() + "-" + get_version() + \
-            " Copyright (C) 2009  Bull S. A. S.  -  All rights reserved\n")
+        _logger.output(get_package_name() + " " + get_version() + \
+            "\nCopyright (C) 2009  Bull S. A. S.\n" + \
+            "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n" + \
+            "This is free software: you are free to change and redistribute it.\n" + \
+            "There is NO WARRANTY, to the extent permitted by law.\n\n" + \
+            "Originally written by Pierre Vignéras")
+        _logger.info("Last commit: %s", get_lastcommit())
+        exit(0)
+
 
     if len(args) < 1:
         parser.error("main: wrong number of arguments.")
