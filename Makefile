@@ -28,7 +28,8 @@ man_alias=graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqe
 man_files=$(man_files_core) $(man_alias)
 
 name=sequencer
-version=1.0.0
+version=$(shell grep 'version=.*' ./VERSION|sed 's/version=//g')
+lastcommit=$(shell git log --pretty=format:'%H %aN %aE %ci'  -1)
 pkg_dir= $(name)-$(version)
 tarall= $(pkg_dir).tar.gz
 package_name=$(pkg_dir)-$(release)
@@ -39,15 +40,10 @@ clean:
 	rm -rf /tmp/$(USER)/$(pkg_dir)/*
 
 
-# Use this target to print out the version that will be produced
-showversion:
-	@echo $(version)
-
 # Use this target to get information gathered by this Makefile.
 # 'make config'
 config:
 	@echo "name:		$(name)"
-	@echo "version:		$(version)"
 	@echo "pkg_dir:		$(pkg_dir)"
 	@echo "tarall:		$(tarall)"
 	@echo "INFO: config OK"
@@ -69,7 +65,9 @@ log: copy
 	git --no-pager log --format="%ai %aN %n%n%x09* %s%d%n" > /tmp/$(USER)/$(pkg_dir)/doc/ChangeLog
 
 version: copy
-	@echo "$(name).version = $(version)" > /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.version
+	@echo "$(name).version = $(version)" > /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.metafile
+	@echo "$(name).lastcommit = $(lastcommit)" >> /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.metafile
+
 
 man: copy
 	@for i in $(man_files);do \
