@@ -21,11 +21,11 @@
 import os
 import subprocess
 import shlex
+from glob import glob
 from setuptools import setup, find_packages
 
-VERSION = '1.0.0.snapshot'
+VERSION_FILE = 'VERSION'
 META_FILE = 'lib/sequencer/.metainfo'
-
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -37,18 +37,28 @@ def read(fname):
 if not os.access('bin/sequencer', os.F_OK):
     os.symlink('sequencer', 'bin/sequencer')
 
+with open(os.path.join(os.path.dirname(__file__), VERSION_FILE)) as version_file:
+          for line in version_file:
+              if not line.startswith('#'):
+                  (key, sep, value) = line.partition('=')
+                  if key == 'version':
+                      version=value
+
+assert version is not None and len(version) > 0,\
+       "Can't fetch the version from file %s" % VERSION_FILE
+
 # Generate the .version file that contains the version and the last
 # commit
-last_commit_cmd_raw = "git show --pretty=format:'%H %aN %aE %ci'  -1"
+last_commit_cmd_raw = "git log --pretty=format:'%H %aN %aE %ci'  -1"
 last_commit_cmd = shlex.split(last_commit_cmd_raw)
 last_commit = subprocess.check_output(last_commit_cmd)
 with open(META_FILE, 'w') as f:
     # Do not change those names unless you also change in commons.py
-    f.write("sequencer.version = %s\n" % VERSION)
+    f.write("sequencer.version = %s\n" % version)
     f.write("sequencer.lastcommit = %s\n" % last_commit)
 
 setup(name='sequencer',
-      version=VERSION,
+      version=version,
       package_dir={'': 'lib'},
       packages=find_packages('lib'),
       package_data={'': ['.metainfo', 'ise/ise.xsd']},
