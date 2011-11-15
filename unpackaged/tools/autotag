@@ -79,7 +79,7 @@ if test $? -ne 0;then
     exit 1
 fi
 echo "Reverting to snapshot version: $nextversion_snapshot"
-cat $tmpfile | sed s"/^version=$version\$/version=$nextversion_snapshot/g" > $file
+cat $tmpfile | sed s"/^version=$version_snapshot\$/version=$nextversion_snapshot/g" > $file
 if test $? -ne 0;then
     echo "Problems encoutered during tagging, exiting."
     exit 1
