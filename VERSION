@@ -1,0 +1,5 @@
+# This file contain the actual version of this project.
+# A version ending with 'snapshot' means that this is
+# a snapshot of the development version.
+# Published releases should never contain a snapshot at the end.
+version=1.0.0.snapshot

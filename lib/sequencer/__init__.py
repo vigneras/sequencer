@@ -24,5 +24,3 @@ The main sequencer package.
 # Read the sequencer.tracer module so logging is configured
 # properly. In particular, the OUTPUT level should be set.
 import sequencer.tracer
-
-
