@@ -2,4 +2,9 @@
 # A version ending with 'snapshot' means that this is
 # a snapshot of the development version.
 # Published releases should never contain a snapshot at the end.
+# The content of this file can be changed
+# by 'make tag'
+# Normally, you leave the '.snapshot' extension, you use 'make tag' 
+# to create a new released version (that will be tagged correctly)
 version=1.0.0.snapshot
+
