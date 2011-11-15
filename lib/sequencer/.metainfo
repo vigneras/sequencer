@@ -2,4 +2,4 @@
 # process (either setup.py or Makefile)
 # Do not change it manually.
 sequencer.version = 1.0.0.snapshot
-sequencer.lastcommit = 763f6cc5261a2613d41092d9239d3433acb41d46 Pierre Vignéras pierre.vigneras@bull.net 2011-11-15 09:50:22 +0100
+sequencer.lastcommit = eca57f87960d3d9604607a8fc88fb1be2f834a66 Pierre Vignéras pierre.vigneras@bull.net 2011-11-15 10:37:06 +0100
