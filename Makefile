@@ -21,24 +21,23 @@ current_makefile := $(lastword $(MAKEFILE_LIST))
 # TODO: Here, you list all the files and directories you want to include
 # with your release. When a directory is specified, all its content is
 # taken into account recursively.
-files=conf bin lib doc
+files := conf bin lib doc
 
-man_files_core=sequencer.dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
-man_alias=graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1 dgmdb.1
-man_files=$(man_files_core) $(man_alias)
+man_files_core := sequencer.dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
+man_alias := graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1 dgmdb.1
+man_files := $(man_files_core) $(man_alias)
 
-name=sequencer
-version=$(shell grep 'version=.*' ./VERSION|sed 's/version=//g')
-lastcommit=$(shell git log --pretty=format:'%H %aN %aE %ci'  -1)
-pkg_dir= $(name)-$(version)
-tarall= $(pkg_dir).tar.gz
-package_name=$(pkg_dir)-$(release)
+name := sequencer
+version := $(shell grep 'version=.*' ./VERSION|sed 's/version=//g')
+lastcommit := $(shell git log --pretty=format:'%H %aN %aE %ci'  -1)
+pkg_dir := $(name)-$(version)
+tarall := $(pkg_dir).tar.gz
+package_name := $(pkg_dir)-$(release)
+tmpdir := $(shell mktemp -d)
 
 # Default target: erase only produced files.
 clean:
 	rm -f *~ archives/$(tarall) archives/$(tarall)
-	rm -rf /tmp/$(USER)/$(pkg_dir)/*
-
 
 # Use this target to get information gathered by this Makefile.
 # 'make config'
@@ -46,6 +45,7 @@ config:
 	@echo "name:		$(name)"
 	@echo "pkg_dir:		$(pkg_dir)"
 	@echo "tarall:		$(tarall)"
+	@echo "tmpdir:		$(tmpdir)"
 	@echo "INFO: config OK"
         @echo "tarall: $(tarall)"
 
@@ -54,24 +54,23 @@ config:
 # command.
 mkdir: config
 	mkdir -p archives
-	mkdir -p /tmp/$(USER)
-	@mkdir -pv /tmp/$(USER)/$(pkg_dir)
+	mkdir -p $(tmpdir)/$(pkg_dir)
 
 copy: mkdir doc
-	cp -r $(files) /tmp/$(USER)/$(pkg_dir)
+	cp -r $(files) $(tmpdir)/$(pkg_dir)
 
 # Create the ChangeLog file and add changelog entries to the RPM .spec file.
 log: copy
-	git --no-pager log --format="%ai %aN %n%n%x09* %s%d%n" > /tmp/$(USER)/$(pkg_dir)/doc/ChangeLog
+	git --no-pager log --format="%ai %aN %n%n%x09* %s%d%n" > $(tmpdir)/$(pkg_dir)/doc/ChangeLog
 
 version: copy
-	@echo "$(name).version = $(version)" > /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.metafile
-	@echo "$(name).lastcommit = $(lastcommit)" >> /tmp/$(USER)/$(pkg_dir)/lib/sequencer/.metafile
+	@echo "$(name).version = $(version)" > $(tmpdir)/$(pkg_dir)/lib/sequencer/.metainfo
+	@echo "$(name).lastcommit = $(lastcommit)" >> $(tmpdir)/$(pkg_dir)/lib/sequencer/.metainfo
 
 
 man: copy
 	@for i in $(man_files);do \
-		gzip -c doc/$$i > /tmp/$(USER)/$(pkg_dir)/doc/$$i.gz; \
+		gzip -c doc/man/$$i > $(tmpdir)/$(pkg_dir)/doc/man/$$i.gz; \
 	done
 
 pdfman:
@@ -81,7 +80,7 @@ pdfman:
 	done
 
 tar: version man
-	tar --exclude-vcs --exclude '*~' --exclude '#*#' -C /tmp/$(USER) --owner=root --group=root -cvzf archives/$(tarall) $(pkg_dir)
+	tar --exclude-vcs --exclude '*~' --exclude '#*#' -C $(tmpdir) --owner=root --group=root -cvzf archives/$(tarall) $(pkg_dir)
 	@echo "INFO: tar OK"
 
 test:
