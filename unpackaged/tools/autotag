@@ -53,17 +53,42 @@ if test -z "$SURE" -o "$SURE" != "y";then
 fi
 
 echo "Moving to tagged version: $tagname"
-echo "Moving $file to $file.old"
-mv $file $file.old
+tmpfile=$(mktemp -t tag-$tagname.XXXX)
+echo "Moving $file to $tmpfile"
+cat $file > $tmpfile
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Setting version in $file to $tagname"
-cat $file.old | sed s"/^version=$version_snapshot\$/version=$version/g" > $file
+cat $tmpfile | sed s"/^version=$version_snapshot\$/version=$version/g" > $file
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Committing"
-git commit -a -m "Tagging process" $file
+git commit -m "Tagging process" $file
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Tagging"
 git tag -a $tagname -m 'Tagging process'
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Reverting to snapshot version: $nextversion_snapshot"
-cat $file.old | sed s"/^version=$version\$/version=$nextversion_snapshot/g" > $file
+cat $tmpfile | sed s"/^version=$version\$/version=$nextversion_snapshot/g" > $file
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Committing"
-git commit -a -m "Back to snapshot" $file
+git commit -m "Back to snapshot" $file
+if test $? -ne 0;then
+    echo "Problems encoutered during tagging, exiting."
+    exit 1
+fi
 echo "Done."
 
