@@ -49,9 +49,11 @@ def get_package_name():
     return _PACKAGE_NAME
 
 
-_SEQUENCER_VERSION_FILE = ".version"
+_SEQUENCER_META_FILE = ".metainfo"
 _SEQUENCER_VERSION_PREFIX = get_package_name() + ".version"
+_SEQUENCER_LASTCOMMIT_PREFIX = get_package_name() + ".lastcommit"
 _MISSING_VERSION_MSG = "?.?.?"
+_MISSING_LASTCOMMIT_MSG = "? ? ? ?"
 
 # TODO: UNIX Only -> how to change it for Windows user?
 CONFDIR_STARTING_POINT = '/etc/'  + get_package_name()
@@ -262,28 +264,44 @@ def td_to_seconds(delta):
                   (delta.seconds +
                    delta.days * 24 * 3600) * 10**6)) / 10**6
 
+def _get_metainfo():
+    """
+    Return meta information from the meta file. This file is normally
+    written by the packaging process.
+    """
+    currentdir = os.path.dirname(__file__)
+    meta_file_name = os.path.join(currentdir, _SEQUENCER_META_FILE)
+    meta = dict()
+    try:
+        with open(meta_file_name, "r") as meta_file:
+            for line in meta_file:
+                (key, sep, value) = line.partition(' = ')
+                if len(value) > 0:
+                    meta[key] = value.strip()
+    except IOError as ioe:
+        _LOGGER.error("Can't open meta file %s: %s ", meta_file_name, ioe)
+    return meta
+
 def get_version():
     """
     Returns the version of the sequencer software. The actual version
-    is registered into the _SEQUENCER_VERSION_FILE. The content of this
-    file should be generated during the packaging phase (make).
+    is registered into the _SEQUENCER_META_FILE. The content of this
+    file should be generated during the packaging phase.
     """
-
-    currentdir = os.path.dirname(__file__)
-    version_file_name = os.path.join(currentdir, _SEQUENCER_VERSION_FILE)
-    try:
-        with open(version_file_name, "r") as version_file:
-            for line in version_file:
-                if line.startswith(_SEQUENCER_VERSION_PREFIX):
-                    version = line.rpartition('=')[2]
-                    return version.strip()
-        _LOGGER.error("Corrupted file %s", version_file_name)
-    except IOError as ioe:
-        _LOGGER.error("Can't open file %s: %s ", version_file_name, ioe)
-
-    return _MISSING_VERSION_MSG
+    meta = _get_metainfo()
+    return meta.get(_SEQUENCER_VERSION_PREFIX, _MISSING_VERSION_MSG)
 
 __version__ = get_version()
+
+def get_lastcommit():
+    """
+    Returns the last commit id. The actual commit id
+    is registered into the _SEQUENCER_META_FILE. The content of this
+    file should be generated during the packaging phase.
+    """
+    meta = _get_metainfo()
+    return meta.get(_SEQUENCER_LASTCOMMIT_PREFIX, _MISSING_LASTCOMMIT_MSG)
+
 
 def confirm(prompt=None, resp=False):
     """prompts for yes or no response from the user. Returns True for yes and
@@ -625,7 +643,7 @@ def remove_leaves(graph, leaves):
 def write_graph_to(graph, file_name):
     """
     Write the given graph to the given file_name. If 'file_name' ==
-    '-', prints to stdout (using tracer.output())
+    '-', prints to stdout (using logger.output())
     """
     nodes = graph.nodes()
     for node in nodes:
@@ -640,11 +658,11 @@ def write_graph_to(graph, file_name):
 
     dot = output_graph(graph)[1]
     if file_name == '-':
-        _TRACER.output(dot)
+        _LOGGER.output(dot)
     else:
         a_file = open(file_name, "w")
         print(dot, file=a_file)
-        _TRACER.debug("Graph written to %s", file_name)
+        _LOGGER.debug("Graph written to %s", file_name)
 
 class SequencerError(Exception):
     """
