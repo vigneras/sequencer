@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+
+# This script does the following:
+
+# - Fetch the current version (should be a snapshot version) from the
+# given file in the project directory
+
+# - Remove the .snapshot part of the version to get the real version
+# - Commit the new version
+# - Tag the new version
+# - Increase the second digit of the version number, and add the .snapshot suffix.
+# - Commit
+
+if test $# -ne 1;then
+	echo "Usage: $(basename $0) version_file";
+	exit 1;
+fi
+
+file=$1
+version_snapshot=$(grep '^version=.*' $file|sed 's/^version=//g')
+version=$(echo $version_snapshot | sed 's/.snapshot//g')
+firstdigit=$(echo $version | sed 's/\..*$//g')
+seconddigit=$(echo $version | sed 's/^[^.]*\.\([^.]*\)\.[^.]*$/\1/g')
+lastdigit=$(echo $version | sed 's/.*\..*\.//g')
+nextdigit=$(($seconddigit + 1));
+nextversion_snapshot=$firstdigit.$nextdigit.$lastdigit.snapshot;
+tagname=v$version
+echo -n "Tagging with $tagname (y/N)?"
+read SURE;
+if test -z "$SURE" -o "$SURE" != "y";then
+    echo "Aborting.";
+    exit 0;
+fi
+
+echo "Moving to tagged version: $tagname"
+echo "Moving $file to $file.old"
+mv $file $file.old
+echo "Setting version in $file to $tagname"
+cat $file.old | sed s"/^version=$version_snapshot\$/version=$version/g" > $file
+echo "Committing"
+git commit -a -m "Tagging process" $file
+echo "Tagging"
+git tag -a $tagname -m 'Tagging process'
+echo "Reverting to snapshot version: $nextversion_snapshot"
+cat $file.old | sed s"/^version=$version\$/version=$nextversion_snapshot/g" > $file
+echo "Committing"
+git commit -a -m "Back to snapshot" $file
+echo "Done."
+
