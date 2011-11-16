@@ -170,6 +170,8 @@ def _get_config_from(basedir):
                                             'filter_path':None,
                                             'depsfinder_path':None,
                                             'action_path':None,
+                                            'guesser.module.name':'sequencer.guesser',
+                                            'guesser.factory.params': None,
                                             'algo':'optimal',
                                             'report':'none',
                                             'fanout':'64',
