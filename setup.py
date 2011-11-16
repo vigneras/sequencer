@@ -21,7 +21,6 @@
 import os
 import subprocess
 import shlex
-from glob import glob
 from setuptools import setup, find_packages
 
 VERSION_FILE = 'VERSION'
@@ -38,11 +37,11 @@ if not os.access('bin/sequencer', os.F_OK):
     os.symlink('sequencer', 'bin/sequencer')
 
 with open(os.path.join(os.path.dirname(__file__), VERSION_FILE)) as version_file:
-          for line in version_file:
-              if not line.startswith('#'):
-                  (key, sep, value) = line.partition('=')
-                  if key == 'version':
-                      version=value
+    for line in version_file:
+        if not line.startswith('#'):
+            (key, sep, value) = line.partition('=')
+            if key == 'version':
+                version=value.strip()
 
 assert version is not None and len(version) > 0,\
        "Can't fetch the version from file %s" % VERSION_FILE
@@ -78,7 +77,7 @@ setup(name='sequencer',
       description='Sequencer library and tools',
       long_description=read('README'),
       requires=('ClusterShell(>=1.5)', 'pygraph(>=1.7.0)', 'pydot', 'lxml(>=2.2.3)', 'graphviz(>=2.26)'),
-      provides='sequencer',
+      provides=['sequencer'],
       classifiers=[
           "Development Status :: 5 - Production/Stable",
           "Environment :: Console",
