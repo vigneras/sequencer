@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+"""
+Guess name#type@category for each given components@list
+"""
+import optparse
+import logging
+from sequencer.guesser import Guesser
+
+__author__ = "Pierre Vigneras"
+__copyright__ = "Copyright (c) 2010 Bull S.A.S."
+__credits__ = ["Pierre Vigneras"]
+
+
+_LOGGER = logging.getLogger(__name__)
+
+def main():
+    """
+    The main! ;-)
+    """
+    usage = "%prog [options] component_list"
+
+    doc = """For each component in the given component_list returns the related
+component type and category. The given component_list should follow
+the following format: name[range]#type@category where category"""
+
+    parser = optparse.OptionParser(usage, description=doc)
+    (options, args) = parser.parse_args()
+
+    if len(args) < 1:
+        parser.error("Wrong number of arguments.")
+
+    guesser = Guesser(None)
+    for cl in args:
+        (components_for, unknown) = guesser.guess_type(cl)
+        if len(unknown) != 0:
+            _LOGGER.warning("%s: Unknown components" % unknown)
+        for category in components_for:
+            for type_ in components_for[category]:
+                name = components_for[category][type_]
+                print("%s#%s@%s" % (name, type_, category))
+
+
+if __name__ == "__main__":
+    main()
