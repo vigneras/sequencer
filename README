@@ -1,0 +1,20 @@
+The *sequencer* is an engine used by system administrators for the
+computation and execution of sequences of actions over hardware or
+software (for example powering on/off a whole cluster or a data-
+center).
+
+The sequencer is made of three different stages for:
+
+    * the computation of dependency graphs;
+    * the computation of instructions sequences;
+    * the execution of instructions sequences.
+
+Each stage can be called separately (in an incremental execution
+mode), or chained together (blackbox execution mode). Both modes have
+their use in real life. Incremental mode allows the end user to
+validate dependency graph and/or instructions sequence before putting
+it on production for its actual execution. This is done for an
+Emergency PowerOff (EPO) instructions sequence for example. The
+blackbox mode is used for simple usage such as powering on/off small
+subset of clusters or data centers.
+
