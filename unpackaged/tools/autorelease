@@ -26,7 +26,7 @@
 # - Invoke 'make tar'
 # - upload the tar file file to github download page
 # - Invoke python setup.py register
-# - Invoke python setup.py sdist bdist upload
+# - Invoke python setup.py sdist upload
 
 #set -x
 
@@ -124,7 +124,7 @@ fi
 
 print_step UPLOADING to PYPI
 (echo "Uploading to PYPI"
-cd $FULL_TMP_DIR && python setup.py register && python setup.py sdist bdist upload) >> $RELEASE_LOG 2>&1
+cd $FULL_TMP_DIR && python setup.py register && python setup.py sdist upload) >> $RELEASE_LOG 2>&1
 
 if test $? -ne 0;then
     echo "Problems encoutered during uploading to PyPi, exiting."
