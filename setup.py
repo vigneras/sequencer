@@ -88,7 +88,7 @@ setup(name='sequencer',
       keywords=['sequencer', 'executor', 'engine'],
       description='The sequencer is used to execute actions in a specified order (for example power on/off clusters)',
       long_description=read('README'),
-      requires=('ClusterShell(>=1.5)', 'pygraph(>=1.7.0)', 'pydot', 'lxml(>=2.2.3)', 'graphviz(>=2.26)'),
+      install_requires=['ClusterShell>=1.5', 'python-graph-core>=1.7.0', 'python-graph-dot>=1.7.0', 'pydot', 'lxml>=2.2.3'],
       provides=['sequencer'],
       classifiers=[
           "Development Status :: 5 - Production/Stable",
