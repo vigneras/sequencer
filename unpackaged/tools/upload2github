@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+# -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+
+# Inspired by http://www.pqpq.de/2011/07/pithub-how-to-create-new-download-via.html
+# Install Pithub first: cpan -i Pithub
+# For local install of Pithub, see http://www.oddmuse.org/cgi-bin/oddmuse/CPAN_Local_Install
+# You probably need to define the PERL5LIB:
+# export PERL5LIB=~/.local/lib/perl5/:~/.local/lib64/perl5/5.12.4/:~/.local/lib64/perl5/site_perl/5.12.4/
+
+# You need specific access to github API for this to work properly.
+# First, register this application (call it 'packaging' for example) within github:
+# https://github.com/account/applications/new
+# Application Name -> packaging
+# URL -> https://github.com/pv-bull/sequencer
+# Callback URL -> https://github.com/pv-bull/sequencer
+# Then with the client_id, ask for write access:
+# Go to https://github.com/login/oauth/authorize?client_id=...&scope=repo
+# Fetch the access_token:
+# https://github.com/login/oauth/access_token?client_id=...&client_secret=...&code=...
+# Where code is taken from the URL of last page.
+# Store parameters into git config:
+# git config --add ghapi.clientid ...
+# git config --add ghapi.token ...
+
+use strict;
+use warnings;
+use Pithub::Repos::Downloads;
+
+if (@ARGV != 5) {
+    print STDERR "Usage: $0 repo ghuser ghtoken file2upload description";
+    exit(1);
+}
+
+my ($repo, $ghuser, $ghtoken, $file2upload, $description) = @ARGV;
+
+my $d = Pithub::Repos::Downloads->new(user => $ghuser,
+                                      repo => $repo,
+                                      token => $ghtoken);
+my $result = $d->create(
+    data => {
+        name         => $file2upload,
+        size         => ( stat("$file2upload") )[7],
+        description  => $description,
+        content_type => 'application/x-gzip',
+    },
+);
+
+if ( $result->success ) {
+    my $upload = $d->upload(result => $result,
+                            file   => $file2upload,
+        );
+    if ( $upload->is_success ) {
+        printf "The file $file2upload has been uploaded succesfully and is now available at: %s\n", $result->content->{html_url};
+    } else {
+        print STDERR $upload->status_line, "\n";
+        exit 1;
+    }
+} else {
+    print STDERR $result->response->status_line, "\n";
+    exit 1;
+}
