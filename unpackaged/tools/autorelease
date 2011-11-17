@@ -1,0 +1,141 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (C) Bull S.A.S (2010, 2011)
+# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+
+# This script does the following:
+
+# - Clone the given git repository into a temporary repository
+# - Checkout the given tag
+# - Invoke 'make tar'
+# - upload the tar file file to github download page
+# - Invoke python setup.py register
+# - Invoke python setup.py sdist bdist upload
+
+#set -x
+
+# How many lines of the log file to show on error
+SHOW_LAST_LINES_NB=10
+
+if test $# -lt 2 -o $# -gt 3;then
+	echo "Usage: $(basename $0) repo tag [gh_reponame]";
+	exit 1;
+fi
+
+# Find the absolute path
+repo=$(readlink -f $1)
+# If not given, default to the last folder name
+if test $# -eq 2;then
+    gh_reponame=$(basename $(readlink -f $1))
+else
+    gh_reponame=$3
+fi
+tag=$2
+cd $repo
+ghuser=$(git config --get github.user)
+ghtoken=$(git config --get ghapi.token)
+upload2github=$(pwd)/unpackaged/tools/upload2github
+
+echo "ghuser: $ghuser"
+echo "ghtoken: $ghtoken"
+echo "gh_reponame: $gh_reponame"
+echo "upload cmd: $upload2github"
+
+remove_tmp() {
+    for i in $*;do
+	if test -e $i; then
+	    echo "Removing $i"
+	    /bin/mv -i $i $i.can_be_removed
+	fi
+    done
+}
+
+last_lines() {
+    file=$1
+    lines=$2
+    echo "FYI, last $lines lines of $file are:"
+    echo "********************************************************************"
+    tail --lines=$lines $file
+    echo "********************************************************************"
+}
+
+CURRENT_STEP=0
+print_step() {
+    CURRENT_STEP=$(($CURRENT_STEP+1))
+    echo "--------------------------------------------------------------------"
+    echo "**** AUTO RELEASE PROCESS STEP $CURRENT_STEP : $* "
+    echo "--------------------------------------------------------------------"
+}
+
+FULL_TMP_DIR=$(mktemp -d -t $tag.XXXX)
+TMP_DIR=$(basename $FULL_TMP_DIR);
+TMP_PATH=$(dirname $FULL_TMP_DIR);
+RELEASE_LOG=$FULL_TMP_DIR.release_log
+echo "I will be mostly silent. See $RELEASE_LOG for details."
+print_step GIT CLONE
+(echo "Cloning $repo into $FULL_TMP_DIR";\
+git clone $repo $FULL_TMP_DIR) >> $RELEASE_LOG 2>&1
+
+print_step GIT CHECKOUT TAG $tag
+(echo "Checking out tag $tag";\
+cd $FULL_TMP_DIR && git checkout $tag) >> $RELEASE_LOG 2>&1
+
+print_step MAKING TAR
+(echo "Invoking 'make tar'"
+cd $FULL_TMP_DIR/$CVS_REPO && make tar) >> $RELEASE_LOG 2>&1
+
+if test $? -ne 0;then
+    echo "Problems encoutered during make tar"
+    echo "(I do not remove $FULL_TMP_DIR: you can see why the build failed by yourself)."
+    last_lines $RELEASE_LOG $SHOW_LAST_LINES_NB
+    echo "Exiting. Sorry."
+    exit 1
+fi
+
+print_step UPLOADING TAR
+TAR=$(ls $FULL_TMP_DIR/archives/*.tar.gz)
+(echo "Uploading $TAR: ";
+set -x;
+cd $FULL_TMP_DIR/archives && $upload2github $gh_reponame $ghuser $ghtoken $(basename $TAR) "Auto-release") >> $RELEASE_LOG 2>&1
+
+if test $? -ne 0;then
+    echo "Problems encoutered during uploading"
+    echo "(I do not remove $FULL_TMP_DIR: you can see why the build failed by yourself)."
+    last_lines $RELEASE_LOG $SHOW_LAST_LINES_NB
+    echo "Exiting. Sorry."
+    exit 1
+fi
+
+print_step UPLOADING to PYPI
+(echo "Uploading to PYPI"
+cd $FULL_TMP_DIR && python setup.py register && python setup.py sdist bdist upload) >> $RELEASE_LOG 2>&1
+
+if test $? -ne 0;then
+    echo "Problems encoutered during uploading to PyPi, exiting."
+    echo "(I do not remove $FULL_TMP_DIR so you can see why the release step failed by yourself)."
+    last_lines $RELEASE_LOG $SHOW_LAST_LINES_NB
+    exit 1
+fi
+
+print_step REMOVING
+remove_tmp $FULL_TMP_DIR $RELEASE_LOG;
+exit 0;
+
+
+
