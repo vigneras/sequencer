@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
@@ -104,7 +105,10 @@ pylint:
 sloc:
 	@sloccount --wide  lib tests bin
 
-tag:
+tag: test
 	@unpackaged/tools/autotag VERSION
+
+release: tag
+	@unpackaged/tools/ask4release .
 
 
