@@ -275,9 +275,10 @@ def _get_metainfo():
     try:
         with open(meta_file_name, "r") as meta_file:
             for line in meta_file:
-                (key, sep, value) = line.partition(' = ')
-                if len(value) > 0:
-                    meta[key] = value.strip()
+                if not line.startswith('#'):
+                    (key, sep, value) = line.partition(' = ')
+                    if len(value) > 0:
+                        meta[key] = value.strip()
     except IOError as ioe:
         _LOGGER.error("Can't open meta file %s: %s ", meta_file_name, ioe)
     return meta
