@@ -18,10 +18,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
-import os
+import os,sys
 import shlex
 import subprocess
 
+from glob import glob
 from setuptools import setup, find_packages
 
 
@@ -75,12 +76,14 @@ except IOError as ioe:
 assert version is not None and len(version) > 0,\
        "Can't fetch version neither from %s nor from %s" % (VERSION_FILE, META_FILE)
 
-
 setup(name='sequencer',
       version=version,
       package_dir={'': 'lib/'},
       packages=find_packages('lib'),
       package_data={'': ['.metainfo', 'ise/ise.xsd']},
+      data_files=[('doc/misc', glob('doc/misc/*')),
+                  ('doc/man/man1', glob('doc/man/*.1')),
+                   ('doc/man/man5', glob('doc/man/*.5'))],
       scripts=['bin/sequencer', 'bin/guesser'],
       author='Pierre Vignéras',
       author_email='pierre.vigneras@bull.net',
