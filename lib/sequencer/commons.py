@@ -22,8 +22,7 @@ This module defines common stuff to all sequencer modules.
 """
 from __future__ import print_function, division
 
-import os, sys
-import random, time
+import os, sys, pwd
 from logging import getLogger
 from operator import itemgetter
 
@@ -55,9 +54,6 @@ _SEQUENCER_LASTCOMMIT_PREFIX = get_package_name() + ".lastcommit"
 _MISSING_VERSION_MSG = "?.?.?"
 _MISSING_LASTCOMMIT_MSG = "? ? ? ?"
 
-# TODO: UNIX Only -> how to change it for Windows user?
-CONFDIR_STARTING_POINT = '/etc/'  + get_package_name()
-
 # Used by smartdisplay
 HSEP = None
 TRUNCATION_REF = "..{%s}"
@@ -80,9 +76,20 @@ def get_basedir(base=None):
     This directory is based on the command name itself.
     """
     cmd = os.path.basename(sys.argv[0])
+    cmdfile = os.path.abspath(sys.argv[0])
+    # Do not follow symbolic links
+    stat = os.lstat(cmdfile)
+    if stat.st_uid == 0:
+        owner = 'root'
+        confdir = os.path.join('/etc', cmd)
+    else:
+        owner_data = pwd.getpwuid(stat.st_uid)
+        owner = owner_data[0]
+        confdir = os.path.join(owner_data[5], '.'+cmd)
+    _LOGGER.debug("Owner is %s; confdir starts at %s", (owner, confdir))
     if base is None:
-        return os.path.join(CONFDIR_STARTING_POINT, cmd)
-    return os.path.join(CONFDIR_STARTING_POINT, cmd, base)
+        return confdir
+    return os.path.join(confdir, base)
 
 def add_options_to(parser, options, config):
     """
