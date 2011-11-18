@@ -152,6 +152,8 @@ class SequencerFileDB(object):
         elif not path.isdir(self.basedir):
             raise SequencerError("Specified basedir is " + \
                                      "not a directory: %s" % self.basedir)
+        else:
+            _LOGGER.warning("Path already exists: %s" % self.basedir)
         self.config_for_ruleset = self._update_rulesets()
 
     def drop_table(self):
@@ -161,6 +163,10 @@ class SequencerFileDB(object):
         _LOGGER.info("Dropping db: %s", self.basedir)
         for ruleset in self.config_for_ruleset:
             os.remove(self._get_config_filename_for(ruleset))
+        try:
+            os.rmdir(self.basedir)
+        except OSError as ose:
+            _LOGGER.warning("Can't remove path %s: %s" % (self.basedir, ose))
 
     def _commit_all_changes(self, rulesets=None):
         """
