@@ -22,7 +22,7 @@ current_makefile := $(lastword $(MAKEFILE_LIST))
 # TODO: Here, you list all the files and directories you want to include
 # with your release. When a directory is specified, all its content is
 # taken into account recursively.
-files := conf bin lib doc
+files := conf bin lib doc setup.py MANIFEST.in README COPYING HOWTO
 
 man_files_core := sequencer.dgmdb.1 sequencer.1 sequencer.graphrules.1 sequencer.knowntypes.1 sequencer.depmake.1 sequencer.seqmake.1 sequencer.seqmake.5 sequencer.seqexec.1 sequencer.seqexec.5 sequencer.chain.1
 man_alias := graphrules.1 knowntypes.1 depmake.1 seqmake.1 seqmake.5 seqexec.1 seqexec.5 chain.1 dgmdb.1
