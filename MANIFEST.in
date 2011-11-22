@@ -1,2 +1,4 @@
 include lib/sequencer/.metainfo
 include lib/sequencer/ise/ise.xsd
+include conf/config
+recursive-include doc *
