@@ -63,8 +63,8 @@ class Guesser(object):
 
     def guess_type(self, components_list):
         """
-        For the given list of components, return a tuple (category,
-        result, unknown) where result is a map of dictionnary
+        For the given list of components, return a tuple (result,
+        unknown) where result is a map of dictionnary
 
         {category: {type: NodeSet}}
 
