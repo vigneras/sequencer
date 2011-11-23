@@ -32,6 +32,7 @@ It does the same thing without the creation of XML file at eath stages
 import optparse
 import os
 import time
+import copy
 from logging import getLogger
 
 from sequencer.commons import write_graph_to, CyclesDetectedError, \
@@ -115,7 +116,15 @@ def chain(db, config, chain_args):
                                         components_lists,
                                         options)
         depmake_stop = time.time()
-        depdag = depgraph.dag
+        if options.depgraphto is not None:
+            # Deep copy is required since the ISM modify the original
+            # graph. This is mandatory so the graph can be written
+            # afterwards. However, deepcopy has an obvious cost: we
+            #  only make a deepcopy when it is required:hence the
+            #  condition.
+            depdag = copy.deepcopy(depgraph.dag)
+        else:
+            depdag = depgraph.dag
     except CyclesDetectedError as cde:
         # Output an error here since we can't continue
         _LOGGER.critical(str(cde))
