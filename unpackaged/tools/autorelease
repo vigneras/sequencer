@@ -21,6 +21,7 @@
 
 # This script does the following:
 
+# - Push tags to the remote directory
 # - Clone the given git repository into a temporary repository
 # - Checkout the given tag
 # - Invoke 'make tar'
@@ -88,6 +89,10 @@ TMP_DIR=$(basename $FULL_TMP_DIR);
 TMP_PATH=$(dirname $FULL_TMP_DIR);
 RELEASE_LOG=$FULL_TMP_DIR.release_log
 echo "I will be mostly silent. See $RELEASE_LOG for details."
+print_step GIT PUSH TAGS
+(echo "Pushing tags of $repo";\
+git push --tags) >> $RELEASE_LOG 2>&1
+
 print_step GIT CLONE
 (echo "Cloning $repo into $FULL_TMP_DIR";\
 git clone $repo $FULL_TMP_DIR) >> $RELEASE_LOG 2>&1
