@@ -21,9 +21,12 @@
 """
 Guess name#type@category for each given components@list
 """
-import optparse
+import ConfigParser
 import logging
-from sequencer.guesser import Guesser
+import optparse
+
+from sequencer.dgm import cli as dgm_cli
+
 
 __author__ = "Pierre Vigneras"
 __copyright__ = "Copyright (c) 2010 Bull S.A.S."
@@ -43,21 +46,34 @@ component type and category. The given component_list should follow
 the following format: name[range]#type@category where category"""
 
     parser = optparse.OptionParser(usage, description=doc)
+    parser.add_option('-c', '--config', dest="config", type='string', nargs=1,
+                      default=None,
+                      help='Specify the configuration file.' + \
+                      ' Default: %default.')
+    parser.add_option('--module', dest="module", type='string', nargs=1,
+                      default='sequencer.guesser',
+                      help='Specify the module name to use.' + \
+                      ' Default: %default.')
+    parser.add_option('--param', dest="param", type='string', nargs=1,
+                      default='None',
+                      help='Specify the module instantiation parameter to use.' + \
+                      ' Default: %default.')
     (options, args) = parser.parse_args()
 
     if len(args) < 1:
         parser.error("Wrong number of arguments.")
 
-    guesser = Guesser(None)
-    for cl in args:
-        (components_for, unknown) = guesser.guess_type(cl)
-        if len(unknown) != 0:
-            _LOGGER.warning("%s: Unknown components" % unknown)
-        for category in components_for:
-            for type_ in components_for[category]:
-                name = components_for[category][type_]
-                print("%s#%s@%s" % (name, type_, category))
+    config = ConfigParser.SafeConfigParser({'guesser.module.name':options.module,
+                                            'guesser.factory.params': options.param,
+                                            })
+    config.add_section(dgm_cli.DEPMAKE_ACTION_NAME)
+    if options.config is not None:
+        _logger.debug("Reading configuration file: %s", options.config)
+        config.read(options.config)
 
+    components_lists = dgm_cli.parse_components_lists(args)
+    for component in dgm_cli.get_component_set_from(config, components_lists):
+        print(component)
 
 if __name__ == "__main__":
     main()
