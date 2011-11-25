@@ -560,11 +560,11 @@ class Component(object):
             (name, sep, type_cat) = self.id.rpartition("#")
             (type_, sep, category) = type_cat.rpartition("@")
             if len(name) == 0 or len(type_) == 0:
-                raise ValueError("DbType and category are mandatory " + \
-                                     "arguments " + \
-                                     "in component definition. " + \
-                                     "Use name#type@category. " + \
-                                     "Got: %s" % args)
+                raise ValueError("Type and category are mandatory " + \
+                                 "arguments " + \
+                                 "in component definition. " + \
+                                 "Use name#type@category. " + \
+                                 "Got: %s" % args)
             self.name = name
             self.type = type_
             self.category = category
@@ -572,11 +572,11 @@ class Component(object):
             self.name = args[0]
             if args[1] is None or len(args[1]) == 0 or \
                     args[2] is None or len(args[2]) == 0:
-                raise ValueError("DbType and category are mandatory " + \
-                                     "arguments " + \
-                                     "in component definition. " + \
-                                     "Use name#type@category. " + \
-                                     "Got: %s" % set(args))
+                raise ValueError("Type and category are mandatory " + \
+                                 "arguments " + \
+                                 "in component definition. " + \
+                                 "Use name#type@category. " + \
+                                 "Got: %s" % set(args))
             self.type = args[1]
             self.category = args[2]
             self.id = self.name + '#' + self.type + "@" + self.category
