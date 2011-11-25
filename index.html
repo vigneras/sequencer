@@ -20,35 +20,14 @@
         <img border="0" width="90" src="https://github.com/images/modules/download/tar.png"/></a>
     </div>
 
-    <div class="text_content">
+    <div class="text_content" style="margin-left:25px;margin-right:25px;font-size:xx-large">
       <h1>The <a href="http://pv-bull.github.com/sequencer/">Sequencer</a> Open-Source Software
       </h1>
 
       <p>
         The sequencer is an engine used by system administrators for
         the computation and execution of sequences of actions over
-        hardware or software (for example powering on/off a whole
-        cluster or a data-center).
-      </p>
-      <p>
-        The sequencer is made of three different stages for:
-        <ul>
-          <li>the computation of dependency graphs;</li>
-          <li>the computation of instructions sequences;</li>
-          <li>the execution of instructions sequences.</li>
-        </ul>
-        Each stage can be called separately (in an incremental
-        execution mode), or chained together (blackbox execution mode). Both
-        modes have their use in real life. 
-      </p>
-      <p>
-        Incremental mode allows the end user to validate dependency graph
-        and/or instructions sequence before putting it on production for its
-        actual execution. This is done for an Emergency PowerOff (EPO)
-        instructions sequence for example.
-      </p>
-      <p>The blackbox mode is used for simple usage such as powering on/off
-        small subset of clusters or data centers.
+        hardware or software.
       </p>
       <p>
         As an example, consider using the sequencer for
@@ -78,7 +57,7 @@
             powered on/off softly the whole petaflopic
             cluster <a href="http://www.wcm.bull.com/internet/pr/rend.jsp?DocId=567851">Tera-100</a> (more than 4000 nodes, ranked #6 in
             <a href="http://www.top500.org/lists/2010/11">the TOP500 list of
-              november 2010</a>) in less than 10 minutes.#
+              november 2010</a>) in less than 10 minutes.
           </li>
           <li><b>Robust:</b> when a command does not complete
             correctly, the sequencer does not execute dependent instructions. It
@@ -163,7 +142,7 @@
               releases: <a href="https://github.com/pv-bull/sequencer/downloads">Project
               Download Web Page</a>
           </li>
-          <li>Source code bundles: 
+          <li>Source code bundles:
             <a href="https://github.com/pv-bull/sequencer/zipball/master">zip</a>
             <a href="https://github.com/pv-bull/sequencer/tarball/master">tar</a>.
           </li>
@@ -173,12 +152,13 @@
         <pre>$ git clone git://github.com/pv-bull/sequencer</pre>
 
       </p>
-      
+
       <h2>Documentation</h2>
       <p>
         The official documentation is on
         the <a href="https://github.com/pv-bull/sequencer/wiki">wiki</a>.
       </p>
+
       <h2>Dependencies/Requirements</h2>
       <p>
         The sequencer depends on the following open-source products:
@@ -221,7 +201,7 @@
           Vignéras</a>.
       </p>
     </div>
-    
+
     <script type="text/javascript">
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-10265445-2']);
