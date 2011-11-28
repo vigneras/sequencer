@@ -24,6 +24,56 @@
       <h1>The <a href="http://pv-bull.github.com/sequencer/">Sequencer</a> Open-Source Software
       </h1>
 
+      <h2>QuickStart</h2>
+      <p>
+      Are you looking for an open-source solution that can:
+
+      <ul>
+        <li>ping various devices in parallel with a straightforward
+          summary output of who is alive and who is not:
+          <pre class="literal-block">
+            $ sequencer ping host[1-100,150-200] rack[1-5] switch[2,4,5] anydevice[4-5]
+          </pre>
+        </li>
+
+        <li>power off a whole set of devices in parallel:
+          <pre class="literal-block">
+            $ sequencer poweroff rack[1-5] switch[2,4,5] anydevice[4-5]
+          </pre>
+        </li>
+
+        <li>power on your whole cluster, taking dependencies into
+          account (e.g: power on a switch before its connected devices):
+          <pre class="literal-block">
+            $ sequencer poweron-dep ALL
+          </pre>
+        </li>
+
+        <li>generate an Emergency PowerOff (EPO) script for your
+          data-center/cluster, that takes into account various dependencies
+          (power off nodes before switches, clients before server), deals with
+          failures kindly and still be very efficient (>4000 nodes in less
+          than 10 minutes):
+
+          <ol>
+            <li>Compute dependencies:<br><code>$ sequencer depmake epo > epo.dep</code></li>
+            <li>Check dependencies:<br><code>$ vi epo.dep</code></li>
+            <li>Generate the epo script:<br><code>$ cat epo.dep | sequencer seqmake > epo.seq</code></li>
+            <li>Check the script:<br><code>$ vi epo.seq</code></li>
+            <li>Execute the script (when required!):<br><code>$ cat epo.seq | sequencer seqexec </code></li>
+          </ol>
+        </li>
+      </ul>
+
+
+      If this is your case, you can continue with
+      an <a href="#overview">overview</a> of <em>the sequencer</em> or jump
+      directly to
+      the <a href="https://github.com/pv-bull/sequencer/wiki/Tutorial">tutorial</a>
+      where you will learn how the "sequencer can ping the world".
+      </p>
+
+      <h2><a name="overview">Overview</a></h2>
       <p>
         The sequencer is an engine used by system administrators for
         the computation and execution of sequences of actions over
@@ -68,7 +118,7 @@
         </ul>
       </p>
 
-      <h2>Main Usage</h2>
+      <h3>Main Usage</h3>
       <p>
         The sequencer mostly targets management of clusters and
         data-centers for:
@@ -93,7 +143,7 @@
         </ul>
       </p>
 
-      <h2>Main Features</h2>
+      <h3>Main Features</h3>
 
       <p>
         The sequencer provides the following main features:
