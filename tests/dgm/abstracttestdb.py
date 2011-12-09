@@ -152,8 +152,10 @@ class AbstractDGMDBTest(object):
     def test_update_normal_fields(self):
         rule = tools.create_rule(self.__class__.__name__, "update_normal")
         self.db.add_rule(rule)
-        self.db.update_rule(rule.ruleset, rule.name, [("action", "NewAction"),
-                                                      ("filter", "NewFilter")])
+        self.db.update_rule(rule.ruleset, rule.name,
+                            [("types", "newtype@newcat"),
+                             ("action", "NewAction"),
+                             ("filter", "NewFilter")])
         rules_for = self.db.get_rules_map()
         self.assertTrue(rules_for is not None)
         self.assertEquals(len(rules_for), 1, str(rules_for))
@@ -161,6 +163,9 @@ class AbstractDGMDBTest(object):
                                                "update_normal"),
                              rules_for)
         rule = rules_for[self.__class__.__name__]["update_normal"]
+        types = rule.types
+        self.assertEquals(len(types), 1)
+        self.assertTrue('newtype@newcat' in types)
         self.assertEquals(rule.action, "NewAction")
         self.assertEquals(rule.filter, "NewFilter")
 
