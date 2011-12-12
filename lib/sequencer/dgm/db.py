@@ -195,7 +195,7 @@ class SequencerFileDB(object):
                                                     RawConfigParser())
         _LOGGER.info("Adding rule: %s to %s", rule, str(config.sections()))
         config.add_section(rule.name)
-        config.set(rule.name, 'type', ",".join(rule.types))
+        config.set(rule.name, 'types', ",".join(rule.types))
         config.set(rule.name, 'filter', rule.filter)
         config.set(rule.name, 'action', str(rule.action))
         config.set(rule.name, 'depsfinder', str(rule.depsfinder))
@@ -375,7 +375,7 @@ class SequencerFileDB(object):
         for section in sections:
             _LOGGER.debug("Reading rule from %s:%s", ruleset, section)
             row = [ruleset, section]
-            row.append(config.get(section, 'type'))
+            row.append(config.get(section, 'types'))
             row.append(config.get(section, 'filter'))
             row.append(config.get(section, 'action'))
             row.append(config.get(section, 'depsfinder'))
