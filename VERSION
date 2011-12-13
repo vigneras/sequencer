@@ -6,5 +6,5 @@
 # by 'make tag'
 # Normally, you leave the '.snapshot' extension, you use 'make tag'
 # to create a new released version (that will be tagged correctly)version=1.7.0.snapsho
-version=1.8.3.snapshot
+version=1.8.1.snapshot
 
