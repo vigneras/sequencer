@@ -42,8 +42,8 @@ version=$(echo $version_snapshot | sed 's/.snapshot//g')
 firstdigit=$(echo $version | sed 's/\..*$//g')
 seconddigit=$(echo $version | sed 's/^[^.]*\.\([^.]*\)\.[^.]*$/\1/g')
 lastdigit=$(echo $version | sed 's/.*\..*\.//g')
-nextdigit=$(($seconddigit + 1));
-nextversion_snapshot=$firstdigit.$nextdigit.$lastdigit.snapshot;
+nextdigit=$(($lastdigit + 1));
+nextversion_snapshot=$firstdigit.$seconddigit.$nextdigit.snapshot;
 tagname=v$version
 echo -n "Tagging with $tagname (y/N)?"
 read SURE;
