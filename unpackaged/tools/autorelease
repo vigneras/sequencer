@@ -103,7 +103,7 @@ cd $FULL_TMP_DIR && git checkout $tag) >> $RELEASE_LOG 2>&1
 
 print_step MAKING TAR
 (echo "Invoking 'make tar'"
-cd $FULL_TMP_DIR/$CVS_REPO && make tar) >> $RELEASE_LOG 2>&1
+cd $FULL_TMP_DIR/ && make tar) >> $RELEASE_LOG 2>&1
 
 if test $? -ne 0;then
     echo "Problems encoutered during make tar"

@@ -32,7 +32,7 @@ fi
 # Find the full path
 GIT_WD=$(readlink -f 1)
 cd $GIT_WD
-PS3='Select a CVS tag: ';
+PS3='Select a tag: ';
 select TAG in $(git tag);do
 	echo "Git tag $TAG selected, invoking autorelease.";
 	break;
