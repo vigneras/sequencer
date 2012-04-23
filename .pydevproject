@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse-pydev version="1.0"?>
+
+<pydev_project>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
+<pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
+<path>/sequencer/lib</path>
+<path>/sequencer/bin</path>
+<path>/sequencer</path>
+</pydev_pathproperty>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>/home/users/vigneras/.local/lib64/python2.7/site-packages/ClusterShell-1.5.1-py2.7.egg/ClusterShell</path>
+<path>/home/users/vigneras/.local/lib64/python2.7/site-packages/python_graph_core-1.8.0-py2.7.egg/pygraph</path>
+<path>/home/users/vigneras/.local/lib64/python2.7/site-packages/python_graph_dot-1.8.0-py2.7.egg/pygraph</path>
+</pydev_pathproperty>
+</pydev_project>
