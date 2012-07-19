@@ -1,5 +1,8 @@
 eclipse.preferences.version=1
+encoding//lib/sequencer/chain/__init__.py=utf-8
 encoding//lib/sequencer/commons.py=utf-8
+encoding//lib/sequencer/dgm/cli.py=utf-8
+encoding//lib/sequencer/guesser.py=utf-8
 encoding//tests/__init__.py=utf-8
 encoding//tests/commons.py=utf-8
 encoding//tests/dgm/testmodel_basic.py=utf-8
