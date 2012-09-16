@@ -9,7 +9,6 @@ from pygraph.algorithms.accessibility import mutual_accessibility
 from pygraph.algorithms.searching import depth_first_search
 from pygraph.readwrite.dot import write
 import os
-import pgdb
 import pwd
 import random
 import sys
@@ -363,14 +362,15 @@ def get_db_connection(host, database, user, password, retry=8):
     """
     If a specific port is required, provide it inside the host name, as in:
     localhost:3124
-     
-    Return a generic connection where: 
-      - 'connection': is a connection to the db.  
+
+    Return a generic connection where:
+      - 'connection': is a connection to the db.
       - 'param_char' is the string used to represent parameter in the
     specific implementation of the Python DB API.
     """
     assert None not in (host, database, user, password)
     i = 0
+    import pgdb
     while True:
         try:
             connection = pgdb.connect(host=host,
@@ -385,7 +385,7 @@ def get_db_connection(host, database, user, password, retry=8):
                                        " Exiting." + \
                                        " Failure message: " + str(pgi).strip())
                 sys.exit(os.EX_TEMPFAIL)
-                
+
             # The next formula gives the following result:
             # i    min    middle    max
             # 0    0,0105    0,0350    0,0600
