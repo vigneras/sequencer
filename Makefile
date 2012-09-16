@@ -91,7 +91,7 @@ tar: version man
 test:
 	@echo "*****************************************************************************"
 	@echo "*****************************************************************************"
-	@echo "*** Test requires some configuration to work! Please see the README file. ***"
+	@echo "*** Test requires some configuration to work! Please see the HOWTO file.  ***"
 	@echo "*****************************************************************************"
 	@echo "*****************************************************************************"
 	@nosetests
