@@ -144,7 +144,7 @@ class SequencerFileDB(object):
 
     def create_table(self):
         """
-        Create the basedir path if does not exist.
+        Create the basedir path if it does not exist.
         """
         if not path.exists(self.basedir):
             _LOGGER.info("Creating db: %s", self.basedir)
@@ -174,6 +174,9 @@ class SequencerFileDB(object):
         'rulesets' to the backing store (the filesystem). If rulesets is None,
         names are taken from 'self.config_for_ruleset.keys()'.
         """
+        if not os.path.exists(self.basedir):
+            _LOGGER.output("Creating base directory %s", self.basedir)
+            os.makedirs(self.basedir)
         if rulesets is None:
             rulesets = self.config_for_ruleset.keys()
         for ruleset in rulesets:
