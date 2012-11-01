@@ -2,6 +2,17 @@
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+from __future__ import print_function, division
+from logging import getLogger
+from operator import itemgetter
+from pygraph.algorithms.accessibility import mutual_accessibility
+from pygraph.algorithms.searching import depth_first_search
+from pygraph.readwrite.dot import write
+import os
+import pwd
+import random
+import sys
+import time
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,15 +31,8 @@
 """
 This module defines common stuff to all sequencer modules.
 """
-from __future__ import print_function, division
 
-import os, sys, pwd
-from logging import getLogger
-from operator import itemgetter
 
-from pygraph.algorithms.accessibility import mutual_accessibility
-from pygraph.algorithms.searching import depth_first_search
-from pygraph.readwrite.dot import write
 
 
 __author__ = "Pierre Vigneras"
@@ -352,6 +356,57 @@ def confirm(prompt=None, resp=False):
             return True
         if ans == 'n' or ans == 'N':
             return False
+
+
+def get_db_connection(host, database, user, password, retry=8):
+    """
+    If a specific port is required, provide it inside the host name, as in:
+    localhost:3124
+
+    Return a generic connection where:
+      - 'connection': is a connection to the db.
+      - 'param_char' is the string used to represent parameter in the
+    specific implementation of the Python DB API.
+    """
+    assert None not in (host, database, user, password)
+    i = 0
+    import pgdb
+    while True:
+        try:
+            connection = pgdb.connect(host=host,
+                                      database=database,
+                                      user=user,
+                                      password=password)
+            break
+        except pgdb.InternalError as pgi:
+            if i == retry:
+                _LOGGER.error("Connection to db %s" % database + \
+                                       " failed after %d retries." % retry + \
+                                       " Exiting." + \
+                                       " Failure message: " + str(pgi).strip())
+                sys.exit(os.EX_TEMPFAIL)
+
+            # The next formula gives the following result:
+            # i    min    middle    max
+            # 0    0,0105    0,0350    0,0600
+            # 1    0,0110    0,0600    0,1100
+            # 2    0,0120    0,1100    0,2100
+            # 3    0,0140    0,2100    0,4100
+            # 4    0,0180    0,4100    0,8100
+            # 5    0,0260    0,8100    1,6100
+            # 6    0,0420    1,6100    3,2100
+            # 7    0,0740    3,2100    6,4100
+            # 8    0,1380    6,4100    12,8100
+            # 9    0,2660    12,8100    25,6100
+
+            # Expressed in seconds
+            delay = (2**i * 50 * random.randint(1, 100) + 1000)/100000.0
+            i = i + 1
+            _LOGGER.debug("Connection to db %s failed." % database + \
+                          " Next retry #%d in %s s" % (i, delay))
+            time.sleep(delay)
+    assert pgdb.paramstyle == 'pyformat'
+    return PostgresDB(database, connection)
 
 class GenericDB(object):
     """

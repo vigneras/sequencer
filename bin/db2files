@@ -3,6 +3,14 @@
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+from sequencer.commons import get_db_connection
+from sequencer.dgm.db import SequencerFileDB, SequencerSQLDB
+from sequencer.ise.rc import ACTION_RC_OK
+from sequencer.tracer import init_trace
+import logging
+import optparse
+import os
+import sys
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,13 +30,8 @@
 """
 Convert sequencer db-based ruleset format to new file-based one.
 """
-import optparse
-import os, sys
 
-from sequencer.commons import get_tracer, get_db_connection
-from sequencer.dgm.db import SequencerFileDB, SequencerSQLDB
-from sequencer.ise.rc import ACTION_RC_OK
-
+_LOGGER = logging.getLogger(__name__)
 
 __author__ = "Pierre Vigneras"
 __copyright__ = "Copyright (c) 2010 Bull S.A.S."
@@ -38,7 +41,7 @@ def main():
     """
     The main! ;-)
     """
-    usage = "%prog [options] directory"
+    usage = "%prog [options] host[:port],database,user,password directory"
 
     doc = """Convert ruleset from the old db-based format to the new
 file-based format. The result is produced in the given directory."""
@@ -53,25 +56,26 @@ file-based format. The result is produced in the given directory."""
     optparser.add_option("-q", "--quiet", dest="quiet",
                          action='store_true', default=False,
                          help="Display only ERROR level messages on output.")
-    optparser.add_option("-b", "--base", dest="db_name",
-                        type='string',
-                         help="Specify database name.")
     optparser.add_option("-D", "--Debug", dest="debug",
                          action='store_true', default=False,
                         help="Display all levels of trace on output.")
 
     (options, args) = optparser.parse_args()
 
-    get_tracer().outputOptions(options.verbose, options.debug, options.quiet)
+    init_trace(options)
 
-    if len(args) == 0:
+    if len(args) != 2:
         optparser.error("Wrong number of arguments.")
 
     db_src = None
     try:
-        raw_db = get_db_connection(options.db_name)
+        params = args[0].split(',', 4)
+        raw_db = get_db_connection(host=params[0],
+                                   database=params[1],
+                                   user=params[2],
+                                   password=params[3])
         db_src = SequencerSQLDB(raw_db)
-        basedir = os.path.abspath(args[0])
+        basedir = os.path.abspath(args[1])
         db_dst = SequencerFileDB(basedir)
         db_dst.create_table()
         rules_map = db_src.get_rules_map()

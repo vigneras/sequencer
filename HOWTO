@@ -1,13 +1,9 @@
-*** Generating the RPM ***
-
-'make rpm' should work. ;-)
-
 *** Launching the unit test suite ***
 
 'make test' should *not* work!!
 
 You should configure your environment so dependent libraries are
-installed. Those libraries are defined in the .spec.
+installed. Those libraries are defined in the setup.py.
 
 Here is the list (as of version 2.3, this README may not be up to date!):
 
@@ -19,28 +15,44 @@ graphviz >= 2.26,
 clustershell >= 1.2.83
 
 
-Standard Lib are easy to install and set-up if you are root on the
-machine you want to launch the test suite. You might either use you
-package manager (yum, apt-get, whatever) or directly download source
-files (use google to find them) and follow the instructions given in
-each of them.
+Standard Lib are easy to install and set-up:
+
+	1. Either use easy_install or pip to install them ;
+
+	2. or use your package manager ;
+
+	3. or download source files and follow the instructions
+	in each of them.
 
 - Well almost, some specific tests might fail to run mainly due to
   configuration issue. This is especially true for tests that used ssh
   to some hosts (localhost). You should be able to do a password-less
   ssh to localhost. Some tests use test1 test2 and test3 as host
-  names. Set up your ~/.ssh/config accordingly. See the test source
-  file for details.
+  names. Set up your ~/.ssh/config accordingly for example with the
+  following entries:
+
+Host localhost
+        Hostname localhost
+        VisualHostKey no
+
+Host test1
+        Hostname localhost
+        VisualHostKey no
+
+Host test2
+        Hostname localhost
+        VisualHostKey no
+
+Host test3
+        Hostname localhost
+        VisualHostKey no
+
+
 
   Also, after an ssh to localhost, the command specified for remote
   execution should be found. If you are in a chrooted environment this
   might not work.
 
-  For example, on atlas, the 'make release' is made in the PDP
-  (chrooted). This Makefile target checkout the project into the
-  $TMPDIR and launch the test suite. Unfortunately, after the ssh,
-  $TMPDIR is not the same. And the test fail. Therefore, you will have
-  to set up the TMPDIR accordingly (for exemple in ~/tmp).
 
 For details, you might use:
 
