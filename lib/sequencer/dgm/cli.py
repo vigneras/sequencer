@@ -78,6 +78,7 @@ DBCHECKSUM_DOC = "Display ruleset checksums"
 GUESSER_MODULE_NAME = 'guesser.module.name'
 GUESSER_PARAMS_NAME = 'guesser.factory.params'
 
+
 def get_usage_data():
     """
     Return a mapping of
@@ -147,12 +148,12 @@ def knowntypes(db, config, args):
         " [action_options] ruleset"
     doc = KNOWNTYPES_DOC + \
         " For each displayed types, the starting rules that will" + \
-        " be applied on them for the" +\
+        " be applied on them for the" + \
         " computation of the dependency graph is also given."
     parser = optparse.OptionParser(usage, description=doc)
     (options, action_args) = parser.parse_args(args)
     if len(action_args) != 1:
-        parser.error(KNOWNTYPES_ACTION_NAME  + ": ruleSet is missing.")
+        parser.error(KNOWNTYPES_ACTION_NAME + ": ruleSet is missing.")
 
     req_ruleset = action_args[0]
     rules = db.get_rules_for(req_ruleset)
@@ -160,7 +161,7 @@ def knowntypes(db, config, args):
     mapping = ruleset.root_rules_for
     tab_values = []
     # Sort according to category
-    for type_ in sorted(mapping, key=lambda t: t[t.find('@')+1]):
+    for type_ in sorted(mapping, key=lambda t: t[t.find('@') + 1]):
         for rule in mapping[type_]:
             line = [type_, rule.filter, rule.name, rule.action]
             tab_values.append(["NONE" if x is None else x for x in line])
@@ -170,6 +171,7 @@ def knowntypes(db, config, args):
                                   u"Rule Name",
                                   u"Action"],
                                  tab_values, vsep=u" | "))
+
 
 def parse_components_lists(lists):
     """
@@ -210,6 +212,7 @@ def parse_components_lists(lists):
 
     return components_list
 
+
 def _parse_depmake_cmdline(config, args):
     """
     DGM Action Specific CLI Parser
@@ -227,12 +230,12 @@ def _parse_depmake_cmdline(config, args):
                       help="Specify the force mode ('allowed'," + \
                           " 'always' or 'never')" + \
                           " that should be used for the execution of" + \
-                          " each action related to the given comma" +\
+                          " each action related to the given comma" + \
                           " separated list of rule names. When prefixed" + \
                           " by " + NOT_FORCE_OP + ", " + \
                           " action execution will 'never' be" + \
                           " forced. Otherwise, it will 'always' be" + \
-                          " forced. Action related to a rule that is "+ \
+                          " forced. Action related to a rule that is " + \
                           " not specified in the list will see its" + \
                           " force mode set to 'allowed' meaning that" + \
                           " the decision is left to the Instruction " + \
@@ -249,6 +252,7 @@ def _parse_depmake_cmdline(config, args):
     lists = action_args[1:]
     components_lists = parse_components_lists(lists)
     return (options, req_ruleset, components_lists)
+
 
 def get_component_set_from(config, components_lists):
     """
@@ -277,6 +281,7 @@ def get_component_set_from(config, components_lists):
                     all_set.add(Component(component, type_, table))
     return all_set
 
+
 def makedepgraph(config, rules, components_lists, options):
     """
     Return the dependency graph for the given pair ('req_ruleset',
@@ -298,6 +303,7 @@ def makedepgraph(config, rules, components_lists, options):
                       NodeSet.fromlist([str(x) for x in depgraph.components_map]))
 
     return depgraph
+
 
 def depmake(db, config, args):
     """
@@ -331,7 +337,6 @@ def depmake(db, config, args):
         else:
             print(output, file=open(dst, "w"))
 
-
     # The DOT graph is written afterwards for two reasons:
     #
     # 1. since the XML graph has already been written out, we can
@@ -344,7 +349,6 @@ def depmake(db, config, args):
         write_graph_to(dag, options.depgraphto)
 
     return os.EX_OK if depgraph is not None else os.EX_DATAERR
-
 
 
 def _display(rules, columns_max):
@@ -364,6 +368,7 @@ def _display(rules, columns_max):
     _LOGGER.output(smart_display(RULES_HEADER, tab_values,
                                  vsep=u' | ', columns_max=columns_max))
 
+
 def dbcreate(db, config, args):
     """
     Create the sequencer table.
@@ -378,6 +383,7 @@ def dbcreate(db, config, args):
                          (0, len(dbcreate_args)))
     db.create_table()
 
+
 def dbdrop(db, config, args):
     """
     Drop the sequencer table.
@@ -389,7 +395,7 @@ def dbdrop(db, config, args):
     (options, dbdrop_args) = parser.parse_args(args)
     if len(dbdrop_args) != 0:
         parser.error(DBDROP_ACTION_NAME + \
-                         ": expected %d arguments, given %d" %\
+                         ": expected %d arguments, given %d" % \
                          (0, len(dbdrop_args)))
     if not options.enforce:
         if not confirm("Confirm the full deletion of the sequencer table?",
@@ -398,6 +404,7 @@ def dbdrop(db, config, args):
             sys.exit(os.EX_OK)
 
     db.drop_table()
+
 
 def dbshow(db, config, args):
     """
@@ -410,7 +417,7 @@ def dbshow(db, config, args):
     parser.add_option("", "--columns", dest="columns_list",
                       action='store',
                       help="Use the given list of 'column:max' for" + \
-                          " the display where 'column' is the column" +\
+                          " the display where 'column' is the column" + \
                           " label, and 'max' is the maximum number of" + \
                           " character that should be used in that" + \
                           "  column (0 means remove the column" + \
@@ -421,7 +428,7 @@ def dbshow(db, config, args):
     (options, show_args) = parser.parse_args(args)
     if len(show_args) > 1:
         parser.error(DBSHOW_ACTION_NAME + \
-                         ": too many arguments %d, maximum is %d" %\
+                         ": too many arguments %d, maximum is %d" % \
                          (len(show_args), 1))
     columns_max = dict()
     if options.columns_list is not None:
@@ -462,6 +469,7 @@ def dbshow(db, config, args):
             all_rules.extend(rules_map[ruleset_name].values())
         _display(all_rules, columns_max)
 
+
 def dbadd(db, config, args):
     """
     Add a rule into the sequencer table.
@@ -481,11 +489,12 @@ have a look to the DB constraints."""
     (options, add_args) = parser.parse_args(args)
     if len(add_args) != 8:
         parser.error(DBADD_ACTION_NAME + \
-                         ": expected %d arguments, given %d" %\
+                         ": expected %d arguments, given %d" % \
                          (8, len(add_args)))
 
     add_args = [None if x == "NONE" or x == "NULL" else x for x in add_args]
     db.add_rule(create_rule_from_strings_array(add_args))
+
 
 def dbremove(db, config, args):
     """
@@ -499,14 +508,14 @@ def dbremove(db, config, args):
     (options, remove_args) = parser.parse_args(args)
     if len(remove_args) < 1:
         parser.error(DBREMOVE_ACTION_NAME + \
-                         ": expected at least %d arguments, given %d" %\
+                         ": expected at least %d arguments, given %d" % \
                          (1, len(remove_args)))
     ruleset = remove_args[0]
     rules = remove_args[1:] if len(remove_args) > 1 else None
     if not options.enforce:
         prompt = "Confirm the removal of %s ruleset %s?" % \
-            (("rules %s from" %\
-                  ", ".join(rules)) if rules is not None else "whole",\
+            (("rules %s from" % \
+                  ", ".join(rules)) if rules is not None else "whole", \
                  ruleset)
         if not confirm(prompt, False):
             _LOGGER.output("Canceled.")
@@ -517,6 +526,8 @@ def dbremove(db, config, args):
                           ": unable to remove following rules %s " + \
                                "from ruleset %s",
                       ", ".join(remaining), ruleset)
+
+
 def dbupdate(db, config, args):
     """
     Update a rule of the sequencer table.
@@ -532,7 +543,7 @@ def dbupdate(db, config, args):
     (options, update_args) = parser.parse_args(args)
     if len(update_args) < 3:
         parser.error(DBUPDATE_ACTION_NAME + \
-                         ": expected a minimum of %d arguments, given %d" %\
+                         ": expected a minimum of %d arguments, given %d" % \
                          (3, len(update_args)))
     ruleset = update_args[0]
     rulename = update_args[1]
@@ -544,8 +555,9 @@ def dbupdate(db, config, args):
     if not db.update_rule(ruleset, rulename,
                           update_set, options.nodeps):
         _LOGGER.error(DBUPDATE_ACTION_NAME + \
-                               ": unable to update specified rule (%s, %s)" %\
+                               ": unable to update specified rule (%s, %s)" % \
                                (ruleset, rulename))
+
 
 def dbcopy(db, config, args):
     """
@@ -559,7 +571,7 @@ def dbcopy(db, config, args):
     (options, copy_args) = parser.parse_args(args)
     if len(copy_args) < 2:
         parser.error(DBCOPY_ACTION_NAME + \
-                         ": expected a minimum of %d arguments, given %d" %\
+                         ": expected a minimum of %d arguments, given %d" % \
                          (2, len(copy_args)))
     (ruleset_src, sep, rule_src) = copy_args[0].partition(":")
     ruleset_dst = copy_args[1]
@@ -600,6 +612,7 @@ def dbcopy(db, config, args):
 
     db.add_rules(dst_set.values())
 
+
 def dbchecksum(db, config, args):
     """
     Display the checksums of rulesets and of each rule in that ruleset.
@@ -611,7 +624,7 @@ def dbchecksum(db, config, args):
     (options, action_args) = parser.parse_args(args)
     if len(action_args) > 1:
         parser.error(DBCHECKSUM_ACTION_NAME + \
-                         ": too many arguments %d, maximum is %d" %\
+                         ": too many arguments %d, maximum is %d" % \
                          (len(action_args), 1))
     tab_values = []
     if len(action_args) == 1:
@@ -634,4 +647,3 @@ def dbchecksum(db, config, args):
     _LOGGER.output(smart_display(CHECKSUM_HEADER,
                                  tab_values,
                                  vsep=u' | '))
-
