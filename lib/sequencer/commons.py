@@ -2,6 +2,25 @@
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+###############################################################################
+"""
+This module defines common stuff to all sequencer modules.
+"""
+
 from __future__ import print_function, division
 from logging import getLogger
 from operator import itemgetter
@@ -13,25 +32,6 @@ import pwd
 import random
 import sys
 import time
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-###############################################################################
-"""
-This module defines common stuff to all sequencer modules.
-"""
-
 
 
 
@@ -89,7 +89,7 @@ def get_basedir(base=None):
     else:
         owner_data = pwd.getpwuid(stat.st_uid)
         owner = owner_data[0]
-        confdir = os.path.join(owner_data[5], '.'+cmd)
+        confdir = os.path.join(owner_data[5], '.' + cmd)
     _LOGGER.debug("Owner is %s; confdir starts at %s", (owner, confdir))
     if base is None:
         return confdir
@@ -273,7 +273,7 @@ def td_to_seconds(delta):
     """
     return float((delta.microseconds +
                   (delta.seconds +
-                   delta.days * 24 * 3600) * 10**6)) / 10**6
+                   delta.days * 24 * 3600) * 10 ** 6)) / 10 ** 6
 
 def _get_metainfo():
     """
@@ -400,7 +400,7 @@ def get_db_connection(host, database, user, password, retry=8):
             # 9    0,2660    12,8100    25,6100
 
             # Expressed in seconds
-            delay = (2**i * 50 * random.randint(1, 100) + 1000)/100000.0
+            delay = (2 ** i * 50 * random.randint(1, 100) + 1000) / 100000.0
             i = i + 1
             _LOGGER.debug("Connection to db %s failed." % database + \
                           " Next retry #%d in %s s" % (i, delay))
