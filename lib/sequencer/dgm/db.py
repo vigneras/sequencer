@@ -2,6 +2,7 @@
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+from test.test_iterlen import len
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,15 +21,15 @@
 """
 Sequencer DB Management
 """
+from ConfigParser import RawConfigParser, DuplicateSectionError
+from os import path
+from sequencer.commons import get_version, UnknownRuleSet, SequencerError, \
+    replace_if_none, NONE_VALUE, DuplicateRuleError
+from sequencer.dgm.model import Rule
 import hashlib
 import logging
 import os
-from ConfigParser import RawConfigParser
-from os import path
 
-from sequencer.commons import get_version, UnknownRuleSet, \
-     SequencerError, replace_if_none, NONE_VALUE
-from sequencer.dgm.model import Rule
 
 
 __author__ = "Pierre Vigneras"
@@ -48,13 +49,13 @@ def _update_hash(checksum, rule):
     for type_ in rule.types:
         checksum.update(str(type_))
     # Do not take filter into account
-    #ruleset_h.update(str(rule.filter))
+    # ruleset_h.update(str(rule.filter))
     checksum.update(str(rule.action))
     checksum.update(str(rule.depsfinder))
     for dep in rule.dependson:
         checksum.update(str(dep))
     # Do not take comment into account
-    #ruleset_h.update(str(rule.comments))
+    # ruleset_h.update(str(rule.comments))
 
 
 def create_rule_from_strings_array(given_row):
@@ -197,7 +198,12 @@ class SequencerFileDB(object):
         config = self.config_for_ruleset.setdefault(rule.ruleset,
                                                     RawConfigParser())
         _LOGGER.info("Adding rule: %s to %s", rule, str(config.sections()))
-        config.add_section(rule.name)
+        try:
+            config.add_section(rule.name)
+        except DuplicateSectionError as dse:
+            _LOGGER.debug("DuplicateSectionError catched: %s"
+                          " -> raising DuplicateRuleError", dse)
+            raise DuplicateRuleError(rule.ruleset, rule.name)
         config.set(rule.name, 'types', ",".join(rule.types))
         config.set(rule.name, 'filter', rule.filter)
         config.set(rule.name, 'action', str(rule.action))
@@ -482,7 +488,7 @@ class SequencerSQLDB(object):
             "depsfinder text, " + \
             "dependson text, " + \
             "comments text, " + \
-            "CONSTRAINT ruleset_name PRIMARY KEY (ruleset, name)," +\
+            "CONSTRAINT ruleset_name PRIMARY KEY (ruleset, name)," + \
             "CONSTRAINT not_empty CHECK (LENGTH(types) > 0 AND" + \
             " LENGTH(filter) > 0 AND " + \
             "(depsfinder ISNULL OR LENGTH(depsfinder) > 0)))"
@@ -500,17 +506,26 @@ class SequencerSQLDB(object):
         Create a single entry in the DB.
         """
         _LOGGER.info("Adding rule: %r", rule)
-        dependson =  None if len(rule.dependson) == 0 \
+        dependson = None if len(rule.dependson) == 0 \
             else ",".join(rule.dependson)
-        self.execute("INSERT INTO sequencer VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                     (rule.ruleset,
-                      rule.name,
-                      ",".join(rule.types),
-                      rule.filter,
-                      rule.action,
-                      rule.depsfinder,
-                      dependson,
-                      rule.comments))
+
+        # test if name and ruleset already exists
+        (rowcount, rows) = self.execute("SELECT * FROM sequencer "
+                                        "WHERE ruleset=? AND name=?",
+                                        (rule.ruleset, rule.name),
+                                        fetch=True)
+        if len(rows) == 0:
+            self.execute("INSERT INTO sequencer VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                         (rule.ruleset,
+                          rule.name,
+                          ",".join(rule.types),
+                          rule.filter,
+                          rule.action,
+                          rule.depsfinder,
+                          dependson,
+                          rule.comments))
+        else:
+            raise DuplicateRuleError(rule.ruleset, rule.name)
 
     def remove_rules(self, ruleset, rule_names=None, nodeps=False):
         """

@@ -740,6 +740,15 @@ class UnknownRuleSet(SequencerError):
     def __init__(self, ruleset):
         SequencerError.__init__(self, "Unknown ruleset: %s" % ruleset)
 
+class DuplicateRuleError(SequencerError):
+    """
+    Raised when a added rule is already in the db.
+    """
+    def __init__(self, ruleset, name):
+        SequencerError.__init__(self, " Rule: %s.%s does already exists." % (ruleset, name))
+        self.ruleset = ruleset
+        self.name = name
+
 class InternalError(SequencerError):
     """
     Thrown when an error has been detected in the sequencer itself.

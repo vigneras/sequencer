@@ -37,7 +37,7 @@ from ClusterShell.NodeSet import NodeSet
 from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
      HSEP, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
      write_graph_to, CyclesDetectedError, get_version, add_options_to, \
-     replace_if_none
+     replace_if_none, DuplicateRuleError
 from sequencer.dgm.db import create_rule_from_strings_array
 from sequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
 from sequencer.ise import cli as ise_cli
@@ -493,7 +493,12 @@ have a look to the DB constraints."""
                          (8, len(add_args)))
 
     add_args = [None if x == "NONE" or x == "NULL" else x for x in add_args]
-    db.add_rule(create_rule_from_strings_array(add_args))
+    try:
+        db.add_rule(create_rule_from_strings_array(add_args))
+    except DuplicateRuleError as dre:
+        _LOGGER.error(DBADD_ACTION_NAME + \
+                     ": Rule %s.%s does already exists.",
+                     dre.ruleset, dre.name)
 
 
 def dbremove(db, config, args):
@@ -523,8 +528,8 @@ def dbremove(db, config, args):
     remaining = db.remove_rules(ruleset, rules, options.nodeps)
     if remaining is not None and len(remaining) != 0:
         _LOGGER.error(DBREMOVE_ACTION_NAME + \
-                          ": unable to remove following rules %s " + \
-                               "from ruleset %s",
+                      ": unable to remove following rules %s "
+                      "from ruleset %s"
                       ", ".join(remaining), ruleset)
 
 

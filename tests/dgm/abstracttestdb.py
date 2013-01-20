@@ -20,10 +20,10 @@
 """
 Test the SequencerDB API
 """
+from sequencer.commons import UnknownRuleSet, DuplicateRuleError
 import random
-
 import tests.dgm.tools as tools
-from sequencer.commons import UnknownRuleSet
+
 
 _DELETE_TMP_FILE = True
 
@@ -39,8 +39,9 @@ class AbstractDGMDBTest(object):
         try:
             self.db.add_rule(rule2)
             self.fail("Duplicate rules are forbidden in the DB")
-        except Exception as e:
-            print "Exception is: %s" % e
+        except DuplicateRuleError as dre:
+            self.assertEquals(dre.ruleset, self.__class__.__name__)
+            self.assertEquals(dre.name, "DupForbidden")
 
 
     def test_get_empty_ruleset(self):
