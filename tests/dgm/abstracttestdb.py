@@ -20,7 +20,8 @@
 """
 Test the SequencerDB API
 """
-from sequencer.commons import UnknownRuleSet, DuplicateRuleError
+from sequencer.commons import UnknownRuleSet, DuplicateRuleError, \
+    NoSuchRuleError
 import random
 import tests.dgm.tools as tools
 
@@ -203,17 +204,16 @@ class AbstractDGMDBTest(object):
                              rules_for)
 
     def test_update_unknown(self):
-        self.assertRaises(ValueError, self.db.update_rule,
+        self.assertRaises(UnknownRuleSet, self.db.update_rule,
                           self.__class__.__name__,
                           "update_unknown",
                           [("name", "should_not_happen")])
         rule = tools.create_rule(self.__class__.__name__, "update_unknown")
         self.db.add_rule(rule)
-        self.assertRaises(ValueError, self.db.update_rule,
+        self.assertRaises(NoSuchRuleError, self.db.update_rule,
                           self.__class__.__name__,
                           "dummy",
                           [("name", "should_not_happen")])
-
 
     def test_update_name_deps_simple(self):
         self.db.add_rule(tools.create_rule("RS", "r1"))

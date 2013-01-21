@@ -821,6 +821,18 @@ class UnknownRuleSet(SequencerError):
     """
     def __init__(self, ruleset):
         SequencerError.__init__(self, "Unknown ruleset: %s" % ruleset)
+        self.ruleset = ruleset
+
+
+class NoSuchRuleError(SequencerError):
+    """
+    Raised when a given rule does no exist in a given ruleset.
+    """
+    def __init__(self, ruleset, name):
+        SequencerError.__init__(self, "Ruleset %s does not "
+                                "contain rule %s" % (ruleset, name))
+        self.ruleset = ruleset
+        self.name = name
 
 
 class DuplicateRuleError(SequencerError):

@@ -26,22 +26,22 @@ It basically parse DGM options and arguments and then call the
 sequencer DGM API.
 """
 from __future__ import print_function
-
+from ClusterShell.NodeSet import NodeSet
+from pygraph.readwrite.markup import write
+from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
+    FILL_EMPTY_ENTRY, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
+    write_graph_to, CyclesDetectedError, get_version, add_options_to, \
+    replace_if_none, DuplicateRuleError, NoSuchRuleError
+from sequencer.dgm.db import create_rule_from_strings_array
+from sequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
+from sequencer.ise import cli as ise_cli
 import logging
 import operator
 import optparse
 import os
 import sys
 
-from ClusterShell.NodeSet import NodeSet
-from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
-     FILL_EMPTY_ENTRY, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
-     write_graph_to, CyclesDetectedError, get_version, add_options_to, \
-     replace_if_none, DuplicateRuleError
-from sequencer.dgm.db import create_rule_from_strings_array
-from sequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
-from sequencer.ise import cli as ise_cli
-from pygraph.readwrite.markup import write
+
 
 
 __author__ = "Pierre Vigneras"
@@ -460,8 +460,12 @@ def dbshow(db, config, args):
     _LOGGER.info("Reading from db: %s", db)
     if len(show_args) == 1:
         ruleset_name = show_args[0]
-        ruleset = db.get_rules_for(ruleset_name)
-        _display(ruleset.values(), columns_max)
+        try:
+            ruleset = db.get_rules_for(ruleset_name)
+            _display(ruleset.values(), columns_max)
+        except UnknownRuleSet as urs:
+            _LOGGER.error(DBSHOW_ACTION_NAME + str(urs))
+            return 1
     else:
         rules_map = db.get_rules_map()
         all_rules = []
@@ -557,11 +561,18 @@ def dbupdate(db, config, args):
         (col, sep, val) = record.partition("=")
         val = None if val == 'NONE' or val == 'NULL' else val
         update_set.add((col, val))
-    if not db.update_rule(ruleset, rulename,
-                          update_set, options.nodeps):
-        _LOGGER.error(DBUPDATE_ACTION_NAME + \
-                               ": unable to update specified rule (%s, %s)" % \
-                               (ruleset, rulename))
+    try:
+        if not db.update_rule(ruleset, rulename,
+                              update_set, options.nodeps):
+            _LOGGER.error(DBUPDATE_ACTION_NAME + \
+                          ": unable to update specified rule (%s, %s)",
+                          ruleset, rulename)
+    except UnknownRuleSet as urs:
+        _LOGGER.error(DBUPDATE_ACTION_NAME + str(urs))
+        return 1
+    except NoSuchRuleError as nsre:
+        _LOGGER.error(DBUPDATE_ACTION_NAME + str(nsre))
+        return 1
 
 
 def dbcopy(db, config, args):
@@ -581,7 +592,12 @@ def dbcopy(db, config, args):
     (ruleset_src, sep, rule_src) = copy_args[0].partition(":")
     ruleset_dst = copy_args[1]
 
-    src_set = db.get_rules_for(ruleset_src)
+    try:
+        src_set = db.get_rules_for(ruleset_src)
+    except UnknownRuleSet as urs:
+        _LOGGER.error(str(urs))
+        return 1
+
     dst_set = dict()
     try:
         dst_set = db.get_rules_for(ruleset_dst)
@@ -592,7 +608,7 @@ def dbcopy(db, config, args):
         _LOGGER.error(DBCOPY_ACTION_NAME + \
                                ": ruleset %s already exists!",
                       ruleset_dst)
-        return
+        return 1
     if rule_src is not None and len(rule_src) != 0:
         if rule_src in dst_set:
             _LOGGER.error(DBCOPY_ACTION_NAME + \
@@ -600,12 +616,12 @@ def dbcopy(db, config, args):
                               " already exists in " + \
                               "ruleset %s!",
                           rule_src, ruleset_dst)
-            return
+            return 1
         if rule_src not in src_set:
             _LOGGER.error(DBCOPY_ACTION_NAME + \
                               ": unknown rule %s in ruleset %s",
                           rule_src, ruleset_src)
-            return
+            return 1
         rule_dst = src_set[rule_src]
         rule_dst.ruleset = ruleset_dst
         db.add_rules([rule_dst])
@@ -634,12 +650,17 @@ def dbchecksum(db, config, args):
     tab_values = []
     if len(action_args) == 1:
         ruleset_name = action_args[0]
-        (ruleset_h, h_for) = db.checksum(ruleset_name)
-        for rulename in h_for:
-            tab_values.append([ruleset_name,
-                               rulename,
-                               h_for[rulename].hexdigest()])
-        tab_values.append([ruleset_name, FILL_EMPTY_ENTRY, ruleset_h.hexdigest()])
+        try:
+            (ruleset_h, h_for) = db.checksum(ruleset_name)
+            for rulename in h_for:
+                tab_values.append([ruleset_name,
+                                   rulename,
+                                   h_for[rulename].hexdigest()])
+            tab_values.append([ruleset_name, FILL_EMPTY_ENTRY, ruleset_h.hexdigest()])
+        except UnknownRuleSet as urs:
+            _LOGGER.error(DBCHECKSUM_ACTION_NAME + str(urs))
+            return 1
+
     else:
         rules_map = db.get_rules_map()
         for ruleset_name in rules_map:

@@ -23,7 +23,7 @@ Sequencer DB Management
 from ConfigParser import RawConfigParser, DuplicateSectionError
 from os import path
 from sequencer.commons import get_version, UnknownRuleSet, SequencerError, \
-    replace_if_none, NONE_VALUE, DuplicateRuleError
+    replace_if_none, NONE_VALUE, DuplicateRuleError, NoSuchRuleError
 from sequencer.dgm.model import Rule
 import hashlib
 import logging
@@ -256,7 +256,6 @@ class SequencerFileDB(object):
             self._commit_all_changes([ruleset])
         return result
 
-
     def update_rule(self, ruleset, name, update_set, nodeps=False, commit=True):
         """
         Update the column 'col' of the given rule ('ruleset', 'name')
@@ -264,9 +263,10 @@ class SequencerFileDB(object):
         been successfully updated. False otherwise.
         """
         config = self.config_for_ruleset.get(ruleset)
-        if config is None or not config.has_section(name):
-            raise ValueError("Unknown (ruleset,name): (%s, %s)" % (ruleset,
-                                                                   name))
+        if config is None:
+            raise UnknownRuleSet(ruleset)
+        if not config.has_section(name):
+            raise NoSuchRuleError(ruleset, name)
 
         new_ruleset = None
         new_name = None
@@ -587,6 +587,23 @@ class SequencerSQLDB(object):
 
         params.append(ruleset)
         params.append(name)
+
+        # test if ruleset already exists
+        (rowcount, rows) = self.execute("SELECT * FROM sequencer "
+                                        "WHERE ruleset=?",
+                                        (ruleset,),
+                                        fetch=True)
+        if len(rows) == 0:
+            raise UnknownRuleSet(ruleset)
+
+        # test if name already exists
+        (rowcount, rows) = self.execute("SELECT * FROM sequencer "
+                                        "WHERE ruleset=? AND name=?",
+                                        (ruleset, name),
+                                        fetch=True)
+        if len(rows) == 0:
+            raise NoSuchRuleError(ruleset, name)
+
         _LOGGER.info("Updating rule (%s %s) with %s",
                      ruleset, name, ", ".join(debug_info))
         rowcount = self.execute("UPDATE sequencer " + \
@@ -594,7 +611,8 @@ class SequencerSQLDB(object):
                                 " WHERE ruleset=? AND name=?",
                                 tuple(params))[0]
         if rowcount == 0:
-            raise ValueError("Unknown (ruleset, name): %s %s" % (ruleset, name))
+            raise ValueError("Unable to update (ruleset, name) for some "
+                             "unknown reasons: %s %s" % (ruleset, name))
 
         if new_name is not None:
             try:
