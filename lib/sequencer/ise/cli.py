@@ -35,7 +35,7 @@ from logging import getLogger
 
 from ClusterShell.NodeSet import NodeSet
 from sequencer.commons import write_graph_to, get_header, \
-    smart_display, HSEP, CyclesDetectedError, td_to_seconds, get_version, \
+    smart_display, FILL_EMPTY_ENTRY, CyclesDetectedError, td_to_seconds, get_version, \
     add_options_to
 from sequencer.ise import api, model, parser
 
@@ -119,6 +119,7 @@ def _report_model(a_model):
     """
     Display the 'model' type of report
     """
+    header = [u"Id", u"[@]Component Set", u"Deps", u"Description"]
     actions = a_model.actions.values()
     actions_nb = len(actions)
     _LOGGER.output("Actions in Model: %d\tLegend: @=remote, Deps=Dependencies",
@@ -139,7 +140,7 @@ def _report_model(a_model):
                            ("@" if action.remote else "")+action.component_set,
                            str(nodeset),
                            action.description])
-    tab_values.append([HSEP, HSEP, HSEP, HSEP])
+    tab_values.append([FILL_EMPTY_ENTRY] * len(header))
     try:
         average_deps = float(deps_total_nb) / actions_nb
     except ZeroDivisionError:
@@ -147,12 +148,9 @@ def _report_model(a_model):
     tab_values.append(["Average #Deps:", "-",
                        "%2.1f" % average_deps,
                        "-"])
-    _LOGGER.output(smart_display([u"Id",
-                                  u"[@]Component Set",
-                                  u"Deps",
-                                  u"Description"],
+    _LOGGER.output(smart_display(header,
                                  tab_values, vsep=u" | ",
-                                 left_align=[False, False, True, False]))
+                                 justify=[str.center, str.center, str.ljust, str.center]))
 
 def _compute_seq_total_time(execution):
     """
@@ -205,6 +203,9 @@ def _report_exec(execution):
     """
     Display the 'exec' type of report
     """
+    header = [u"Id", u"Submitted Time",
+              u"Started Time", u"Ended Time", u"Duration",
+              u"RC", u"[@]Component Set"]
     executed_actions = execution.executed_actions.values()
     executed_actions_nb = len(executed_actions)
     model_actions_nb = len(execution.model.actions)
@@ -250,7 +251,7 @@ def _report_exec(execution):
     try:
         seq_total_time = _compute_seq_total_time(execution)
         average_duration = seq_total_time // executed_actions_nb
-        tab_values.append([HSEP, HSEP, HSEP, HSEP, HSEP, HSEP, HSEP])
+        tab_values.append([FILL_EMPTY_ENTRY] * len(header))
         tab_values.append(["First:", "-",
                            str(dt.fromtimestamp(first_started)\
                                    .strftime(_TIME_FORMAT)),
@@ -268,13 +269,11 @@ def _report_exec(execution):
                            "-", "-"])
     except ZeroDivisionError:
         average_duration = 0
-    output = smart_display([u"Id", u"Submitted Time",
-                            u"Started Time", u"Ended Time", u"Duration",
-                            u"RC", u"[@]Component Set"],
+    output = smart_display(header,
                            tab_values, vsep=u' | ',
-                           left_align=[False, False,
-                                       False, False, False,
-                                       False, True])
+                           justify=[str.center, str.center,
+                                       str.center, str.center, str.center,
+                                       str.center, str.ljust])
     _LOGGER.output(output)
 
 def _report_error(execution):
@@ -312,9 +311,9 @@ def _report_error(execution):
                             u"#rDeps", u"%rDeps",
                             u"rDeps"],
                            tab_values, vsep=u" | ",
-                           left_align=[False, False,
-                                       False, False,
-                                       True])
+                           justify=[str.center, str.center,
+                                    str.center, str.center,
+                                    str.ljust])
     _LOGGER.output(output)
 
 def _report_unexec_line(id_, deps_nb, mdeps_nb, mdeps_percent, mdeps):
@@ -373,9 +372,9 @@ def _report_unexec(a_model, execution):
                             u"#mDeps", u"%mDeps",
                             u"mDeps"],
                            tab_values, vsep=u" | ",
-                           left_align=[False, False,
-                                       False, False,
-                                       True])
+                           justify=[str.center, str.center,
+                                    str.center, str.center,
+                                    str.ljust])
     _LOGGER.output(output)
 
 def _diplay_stats_duration(type_, duration, percent):

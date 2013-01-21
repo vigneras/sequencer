@@ -35,7 +35,7 @@ import sys
 
 from ClusterShell.NodeSet import NodeSet
 from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
-     HSEP, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
+     FILL_EMPTY_ENTRY, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
      write_graph_to, CyclesDetectedError, get_version, add_options_to, \
      replace_if_none, DuplicateRuleError
 from sequencer.dgm.db import create_rule_from_strings_array
@@ -639,7 +639,7 @@ def dbchecksum(db, config, args):
             tab_values.append([ruleset_name,
                                rulename,
                                h_for[rulename].hexdigest()])
-        tab_values.append([ruleset_name, HSEP, ruleset_h.hexdigest()])
+        tab_values.append([ruleset_name, FILL_EMPTY_ENTRY, ruleset_h.hexdigest()])
     else:
         rules_map = db.get_rules_map()
         for ruleset_name in rules_map:
@@ -648,7 +648,7 @@ def dbchecksum(db, config, args):
                 tab_values.append([ruleset_name,
                                    rulename,
                                    h_for[rulename].hexdigest()])
-            tab_values.append([ruleset_name, HSEP, ruleset_h.hexdigest()])
+            tab_values.append([ruleset_name, FILL_EMPTY_ENTRY, ruleset_h.hexdigest()])
     _LOGGER.output(smart_display(CHECKSUM_HEADER,
                                  tab_values,
                                  vsep=u' | '))

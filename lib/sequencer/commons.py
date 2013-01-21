@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+This module defines common stuff to all sequencer modules.
+"""
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
 # Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
@@ -17,22 +20,20 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ###############################################################################
-"""
-This module defines common stuff to all sequencer modules.
-"""
 
 from __future__ import print_function, division
 from logging import getLogger
-from operator import itemgetter
 from pygraph.algorithms.accessibility import mutual_accessibility
 from pygraph.algorithms.searching import depth_first_search
 from pygraph.readwrite.dot import write
+import cStringIO
+import math
 import os
 import pwd
 import random
+import re
 import sys
 import time
-
 
 
 __author__ = "Pierre Vigneras"
@@ -45,9 +46,11 @@ __credits__ = ["Pierre Vigneras"]
 _LOGGER = getLogger(__name__)
 _PACKAGE_NAME = __name__.split('.')[0]
 
+
 def get_package_name():
     """
-    Return the distribution package name (RPM, DEB, whatever the final format is)
+    Return the distribution package name (RPM, DEB, whatever
+    the final format is)
     """
     return _PACKAGE_NAME
 
@@ -59,19 +62,22 @@ _MISSING_VERSION_MSG = "?.?.?"
 _MISSING_LASTCOMMIT_MSG = "? ? ? ?"
 
 # Used by smartdisplay
-HSEP = None
+FILL_EMPTY_ENTRY = '!#$_'
 TRUNCATION_REF = "..{%s}"
 TRUNCATION_MAX_SIZE = len(TRUNCATION_REF)
 REMOVE_UNSPECIFIED_COLUMNS = -1
 
 # Use by replace_if_none
 NONE_VALUE = str(None)
+
+
 def replace_if_none(value):
     """
     Replace the given value by NONE_VALUE if it is considered none or empty
     """
     return None if value is not None and (value == NONE_VALUE or len(value) == 0) \
         else value
+
 
 def get_basedir(base=None):
     """
@@ -95,6 +101,7 @@ def get_basedir(base=None):
         return confdir
     return os.path.join(confdir, base)
 
+
 def add_options_to(parser, options, config):
     """
     Add given options to the given parser using given configuration
@@ -103,6 +110,7 @@ def add_options_to(parser, options, config):
     for long_opt in options:
         parms = get_option_for(long_opt, config)
         parser.add_option(*parms[0], **parms[1])
+
 
 def get_option_for(opt_name, config):
     """Returns a pair [opt_tuple, opt_dict] where 'opt_tuple'
@@ -267,6 +275,7 @@ def get_option_for(opt_name, config):
                  }]
     raise ValueError("Unknown option: %s" % opt_name)
 
+
 def td_to_seconds(delta):
     """
     Return the number of seconds of a time duration.
@@ -274,6 +283,7 @@ def td_to_seconds(delta):
     return float((delta.microseconds +
                   (delta.seconds +
                    delta.days * 24 * 3600) * 10 ** 6)) / 10 ** 6
+
 
 def _get_metainfo():
     """
@@ -294,6 +304,7 @@ def _get_metainfo():
         _LOGGER.error("Can't open meta file %s: %s ", meta_file_name, ioe)
     return meta
 
+
 def get_version():
     """
     Returns the version of the sequencer software. The actual version
@@ -304,6 +315,7 @@ def get_version():
     return meta.get(_SEQUENCER_VERSION_PREFIX, _MISSING_VERSION_MSG)
 
 __version__ = get_version()
+
 
 def get_lastcommit():
     """
@@ -408,6 +420,7 @@ def get_db_connection(host, database, user, password, retry=8):
     assert pgdb.paramstyle == 'pyformat'
     return PostgresDB(database, connection)
 
+
 class GenericDB(object):
     """
     Instance of this class are independent of the underlying DB
@@ -472,6 +485,7 @@ class GenericDB(object):
         """
         return self.name
 
+
 class PostgresDB(GenericDB):
     """
     Postgres implementation of the GenericDB.
@@ -495,6 +509,7 @@ def substitute(value_for, string):
         result = result.replace(key, value_for[key])
     return result
 
+
 def make_list_from_sql_result(sql_result, column_name):
     """
     Returns a list made from each element of the given column_name in
@@ -516,6 +531,7 @@ def get_header(title, symbol, size):
     symbol_nb = (size - title_len) // 2
     return (symbol * symbol_nb) + title + (symbol * symbol_nb)
 
+
 def get_nodes_from(component_set):
     """
     Get the list of nodes specified in the given component set
@@ -525,60 +541,177 @@ def get_nodes_from(component_set):
         return component_set
     return component_set[0:index]
 
-def smart_display(header, tab_values, hsep=u"-", vsep=u" ",
-                  left_align=None, columns_max=dict()):
+# Code below taken from http://code.activestate.com/recipes/267662/ (r7)
+# and modified to our own needs.
+def indent(rows,
+           hasHeader=False, headerChar='-',
+           delim=' | ',
+           justify_functions=None,
+           separateRows=False,
+           prefix='', postfix='',
+           max_widths=None,
+           filler_char='_'):
+    """Indents a table by column.
+       - rows: A sequence of sequences of items, one sequence per row.
+       - hasHeader: True if the first row consists of the columns' names.
+       - headerChar: Character to be used for the row separator line
+         (if hasHeader==True or separateRows==True).
+       - delim: The column delimiter.
+       - justify_functions: Determines how are data justified in each column.
+         Valid values are function of the form f(str,width)->str such as 
+         str.ljust, str.center and str.rjust. Default is str.ljust.
+       - separateRows: True if rows are to be separated by a line
+         of 'headerChar's.
+       - prefix: A string prepended to each printed row.
+       - postfix: A string appended to each printed row.
+       - max_widths: Determines the maximum width for each column.
+         Words are wrapped to the specified maximum width if greater than 0.
+         Wrapping is not done at all when max_width is set to None.
+         This is the default.
+       - filler_char: a row entry that is FILL_EMPTY_ENTRY will be filled by
+         the specified filler character up to the maximum width for
+         the related column. 
+    """
+    if justify_functions is None:
+        justify_functions = [str.ljust] * len(rows[0])
+    _LOGGER.debug("Justify: %s", justify_functions)
+    if max_widths is None:
+        max_widths = [0] * len(rows[0])
+    _LOGGER.debug("max_widths: %s", max_widths)
+
+    def i2str(item, maxwidth):
+        """Trasform the given row item into a final string."""
+        if item is FILL_EMPTY_ENTRY:
+            return str(filler_char) * maxwidth
+        return str(item)
+
+    # closure for breaking logical rows to physical, using wrapfunc
+    def rowWrapper(row):
+        newRows = [wrap_onspace_strict(item, width).split('\n') for (item, width) in zip(row, max_widths)]
+        _LOGGER.debug("NewRows: %s", newRows)
+        if len(newRows) <= 1:
+            return newRows
+        return [[substr or '' for substr in item] for item in map(None, *newRows)]
+
+    # break each logical row into one or more physical ones
+    logicalRows = [rowWrapper(row) for row in rows]
+    _LOGGER.debug("logicalRows: %s", logicalRows)
+    # Fetch the list of physical rows
+    physicalRows = logicalRows[0]
+    for lrow in logicalRows[1:]:
+        physicalRows += lrow
+    _LOGGER.debug("physicalRows: %s", physicalRows)
+    # columns of physical rows
+    if len(physicalRows) == 0:
+        return ''
+    columns = map(None, *physicalRows)
+    _LOGGER.debug("columns: %s", columns)
+    # get the maximum of each column by the string length of its items
+    maxWidths = [max([len(str(item)) for item in column]) for column in columns]
+    _LOGGER.debug("MaxWidths: %s", maxWidths)
+    rowSeparator = headerChar * (len(prefix) + len(postfix) + sum(maxWidths) + \
+                                 len(delim) * (len(maxWidths) - 1))
+    output = cStringIO.StringIO()
+    if separateRows:
+        print(rowSeparator, file=output)
+    # for physicalRows in logicalRows:
+    for row in physicalRows:
+        _LOGGER.debug("row: %s", row)
+        line = [justify(i2str(item, width),
+                        width) for (item,
+                                    justify,
+                                    width) in zip(row,
+                                                  justify_functions,
+                                                  maxWidths)]
+        print(prefix + delim.join(line) + postfix,
+              file=output)
+        if separateRows or hasHeader:
+            print(rowSeparator, file=output)
+            hasHeader = False
+    return output.getvalue()
+
+
+# written by Mike Brown
+# http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
+def wrap_onspace(text, width):
+    """
+    A word-wrap function that preserves existing line breaks
+    and most spaces in the text. Expects that existing line
+    breaks are posix newlines (\n).
+    """
+    return reduce(lambda line, word, width=width: '%s%s%s' %
+                  (line,
+                   ' \n'[(len(line[line.rfind('\n') + 1:])
+                         + len(word.split('\n', 1)[0]
+                              ) >= width)],
+                   word),
+                  text.split(' ')
+                 )
+
+
+def wrap_onspace_strict(text, width):
+    """Similar to wrap_onspace, but enforces the width constraint:
+       words longer than width are split."""
+    if text is None:
+        text = str(None)
+    if width == 0:
+        return text
+    wordRegex = re.compile(r'\S{' + str(width) + r',}')
+    return wrap_onspace(wordRegex.sub(lambda m: wrap_always(m.group(), width), text), width)
+
+
+def wrap_always(text, width):
+    """A simple word-wrap function that wraps text on exactly width characters.
+       It doesn't split the text in words."""
+    return '\n'.join([ text[width * i:width * (i + 1)] \
+                       for i in xrange(int(math.ceil(1.*len(text) / width))) ])
+
+
+def smart_display(header, data,
+                  hsep=u'=', vsep=u' | ',
+                  justify=None,
+                  columns_max=None,
+                  filler_char=u'-'):
     """
     Display an array so each columns are well aligned.
 
-    header: the list of column header that should be displayed
+    - header: the list of column header that should be displayed
 
-    tab_values: a list of lines that should be displayed. A line is a
-    list of strings. If one element in the line is the HSEP constant, the
-    'hsep' string will fill the corresponding column.
+    - data: a list of lines that should be displayed. A line is a
+      list of strings. If one element in the line is the FILL_EMPTY_ENTRY
+      constant, the 'filler_char' string will fill up the corresponding column.
 
-    hsep: the horizontal separator (just after the header)
-    vsep: the vertical separator (between columns)
+    - hsep: the horizontal separator (just after the header)
+    - vsep: the vertical separator (between columns)
 
-    left_align: a list of boolean representing left alignement when true.
+    - justify: a list of alignement justifiers, one for each column.
+      Values in the list should be a function f(s,w)->s such as 
+      str.rjust, str.ljust and str.center. Default is str.ljust.
 
-    columns_max: a {column_header: max} dictionnary that should be used
-    for the display of the related column. If max is 0, it means
-    that the column will not be displayed at all. If max is greater
-    than 0, then max characters will be used for the display of the column.
-    When a string is greater than the 'max', it is truncated and a legend is
-    produced at the end of the table. When max=REMOVE_UNSPECIFIED_COLUMNS, then
-    only header from columns_max will be displayed.
+    - columns_max: a {column_header: max} dictionnary that should be used
+      for the display of the related column. If max is 0, it means
+      that the column will not be displayed at all. If max is greater
+      than 0, then max characters will be used for the display of the column.
+      When a string is greater than the 'max', it is wrapped.
+      When max=REMOVE_UNSPECIFIED_COLUMNS, then
+      only header from columns_max will be displayed.
 
-    *Warning*: Unicode strings are required.
+      *Warning*: Unicode strings are required.
     """
 
-    if left_align is not None:
-        assert len(left_align) == len(header)
+    assert header is not None
+    assert data is not None
+    assert hsep is not None
+    assert vsep is not None
+    assert len(header) > 0
+    if justify is not None:
+        assert len(justify) == len(header)
+    else:
+        justify = ['left'] * len(header)
+    if columns_max is None:
+        columns_max = dict()
 
-    def truncate(s, maxchar, legends, nextref):
-        """
-        Return a tuple (trunc_s, nextref) where trunc_s is
-        the string 's' truncated if its length is larger than
-        maxchar, and the string 's' unmodified otherwise.
-        If truncation occurs, the given legends dictionnary is updated
-        and nextref is incremented (and returned in the tuple)
-        """
-        result = s
-        if s is not None and len(s) > maxchar:
-            trunc_maxchar = maxchar - TRUNCATION_MAX_SIZE
-            assert trunc_maxchar >= 0, "Can't represent string %s " % s + \
-                " with the provided maximum" + \
-                " characters %d" % maxchar
-            ref = nextref
-            if s in legends:
-                ref = legends[s]
-            else:
-                legends[s] = ref
-                nextref = ref + 1
-            result = s[0:trunc_maxchar] + TRUNCATION_REF % ref
-        return (result, nextref)
-
-    def remove_columns(header, columns_max, tab_values):
+    def remove_columns(header, columns_max, data):
         """
         Remove columns with a maximum character number set to 0 and
         columns that are not present in columns_max if one element in
@@ -603,87 +736,33 @@ def smart_display(header, tab_values, hsep=u"-", vsep=u" ",
         for head in given_header:
             if head in columns_max and columns_max[head] == 0:
                 del header[i]
-                for line in tab_values:
+                for line in data:
                     del line[i]
             else:
                 # Next column is j+1 only if a removal has not been made.
                 i += 1
 
-    def compute_max_map(header, tab_values, columns_max):
-        """
-        Return a list of maximum number of character for each column.
-        """
-        col = 0
-        max_map = [0] * col_nb
-        while col < col_nb:
-            head = header[col]
-            max_map[col] = columns_max.get(head, len(header[col]))
-            line = 0
-            while line < line_nb:
-                string = tab_values[line][col]
-                if string is not HSEP:
-                    max_map[col] = columns_max.get(head,
-                                                   max(max_map[col],
-                                                       len(string)))
-                line += 1
-            col += 1
-        return max_map
-
-    def align(left_align, data, col):
-        """
-        Return the given data for the given col aligned
-        """
-        if left_align is not None and left_align[col]:
-            return u"%-*.*s" % data
-        else:
-            return u"%*.*s" % data
-
-    legends = dict()
-    nextref = 0
-    remove_columns(header, columns_max, tab_values)
+    remove_columns(header, columns_max, data)
     col_nb = len(header)
-    line_nb = len(tab_values)
-    max_map = compute_max_map(header, tab_values, columns_max)
-    lines = []
-    col = 0
-    line_len = 0
-    # Write the header
-    while col < col_nb:
-        (head, nextref) = truncate(header[col], max_map[col], legends, nextref)
-        lines.append(align(left_align, (max_map[col], max_map[col], head), col))
-        lines.append(vsep)
-        line_len += (max_map[col] + len(vsep))
-        col += 1
-    # Write the separator
-    lines.append('\n' + (hsep * line_len) + '\n')
-    line = 0
-    # Write each line
-    while line < line_nb:
-        col = 0
-        while col < col_nb:
-            (string, nextref) = truncate(tab_values[line][col],
-                                         max_map[col], legends, nextref)
-            if string is HSEP:
-                string = hsep * max_map[col]
-            data = (max_map[col], max_map[col], string)
-            lines.append(align(left_align, data, col))
-            lines.append(vsep)
-            col += 1
-        line += 1
-        lines.append(u'\n')
-    if len(legends) > 0:
-        lines.append(u'\nLegend:\n')
-        for (string, ref) in sorted(legends.items(), key=itemgetter(1)):
-            if string is not None:
-                lines.append(str(ref) + ': ' + string + '\n')
+    line_nb = len(data)
+    max_widths = []
+    for h in header:
+        max_widths.append(columns_max.get(h, 0))
 
-    return "".join(lines)
+    return indent([header] + data, hasHeader=True,
+                  headerChar=hsep, delim=vsep,
+                  separateRows=False,
+                  max_widths=max_widths,
+                  filler_char=filler_char)
+
 
 def output_graph(graph, root=None):
     """
     Returns a tuplet containing:
-    - the result of the depth_first_search() function starting at 'root' (is is a tuplet)
-    - a dot format output of the given graph (display it using graphviz dotty command)
+    - the result of the depth_first_search() function starting at 'root'
+      (is is a tuplet)
+    - a dot format output of the given graph (display it using graphviz
+      dotty command)
     """
 
     dfs = depth_first_search(graph, root)
@@ -702,6 +781,7 @@ def remove_leaves(graph, leaves):
         for parent in incidents:
             graph.del_edge((parent, node))
         graph.del_node(node)
+
 
 def write_graph_to(graph, file_name):
     """
@@ -727,11 +807,13 @@ def write_graph_to(graph, file_name):
         print(dot, file=a_file)
         _LOGGER.debug("Graph written to %s", file_name)
 
+
 class SequencerError(Exception):
     """
     Base Class for all Sequencer Exception
     """
     pass
+
 
 class UnknownRuleSet(SequencerError):
     """
@@ -740,14 +822,18 @@ class UnknownRuleSet(SequencerError):
     def __init__(self, ruleset):
         SequencerError.__init__(self, "Unknown ruleset: %s" % ruleset)
 
+
 class DuplicateRuleError(SequencerError):
     """
     Raised when a added rule is already in the db.
     """
     def __init__(self, ruleset, name):
-        SequencerError.__init__(self, " Rule: %s.%s does already exists." % (ruleset, name))
+        SequencerError.__init__(self,
+                                " Rule: %s.%s does "
+                                "already exists." % (ruleset, name))
         self.ruleset = ruleset
         self.name = name
+
 
 class InternalError(SequencerError):
     """
@@ -757,6 +843,7 @@ class InternalError(SequencerError):
     In this case, please contact Bull support.
     """
     pass
+
 
 class CyclesDetectedError(SequencerError):
     """
@@ -785,5 +872,3 @@ class SQLError(Exception):
     Thrown when an SQL error is detected.
     """
     pass
-
-
