@@ -1,0 +1,39 @@
+[test_graphrules_nofile]
+graph=digraph graphname {
+    "mmąöî";
+    "mmąöî" -> "mmąöî";
+    }
+    \n
+
+[test_graphrules_nofile_2rules]
+graph=digraph graphname {
+    "mmąöî2";
+    "mmąöî";
+    "mmąöî2" -> "mmąöî";
+    "mmąöî" -> "mmąöî";
+    }
+    \n
+
+[test_graphrules_file]
+graph=digraph graphname {
+    "mmąöî";
+    "mmąöî" -> "mmąöî";
+    }
+    \n
+
+[test_graphrules_file_2rules]
+graph=digraph graphname {
+    "mmąöî2";
+    "mmąöî";
+    "mmąöî2" -> "mmąöî";
+    "mmąöî" -> "mmąöî";
+    }
+    \n
+
+[test_knowntypes]
+table=*      Type | Filter | Rule Name | Action | *
+    -------------------------------------------
+    fake@mmąöî |  mmąöî |     mmąöî |  mmąöî | *
+    \n
+    
+
