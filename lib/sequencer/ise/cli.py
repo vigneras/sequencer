@@ -36,7 +36,7 @@ from logging import getLogger
 from ClusterShell.NodeSet import NodeSet
 from sequencer.commons import write_graph_to, get_header, \
     smart_display, FILL_EMPTY_ENTRY, CyclesDetectedError, td_to_seconds, get_version, \
-    add_options_to
+    add_options_to, to_unicode
 from sequencer.ise import api, model, parser
 
 
@@ -87,7 +87,9 @@ def _parse(basedir, config, args):
 
     doc = SEQEXEC_DOC + \
         " The input can be the output of the 'seqmake' action."
-    opt_parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    opt_parser = optparse.OptionParser(usage, description=doc, prog=progname)
     opt_parser.add_option("-F", "--Force",
                           dest="force",
                           action='store_true',
@@ -531,12 +533,5 @@ def seqexec(db, config, args):
         write_graph_to(dag, options.actionsgraphto)
 
     return execution.rc if the_model is not None else os.EX_DATAERR
-
-
-
-
-
-
-
 
 
