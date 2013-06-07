@@ -30,7 +30,8 @@ import subprocess
 from io import StringIO
 
 from ClusterShell.NodeSet import NodeSet
-from sequencer.commons import CyclesDetectedError, substitute, get_version
+from sequencer.commons import CyclesDetectedError, substitute, get_version,\
+                                test_unicode, to_unicode, to_str_from_unicode
 from sequencer.dgm.errors import UnknownDepError
 from sequencer.ise.rc import FORCE_ALWAYS, FORCE_NEVER
 from pygraph.algorithms.cycles import find_cycle
@@ -49,7 +50,7 @@ ALL = 'ALL'
 FILTER_RE_OP = ['=~', '!~']
 NOT_FORCE_OP = '^'
 
-def _get_var_map(id_, name, type_, category, ruleset, rulename):
+def _get_var_map(id_, name, type_, category, ruleset, rulename, help):
     """
     Returns the variable substitution mapping.
     """
@@ -58,10 +59,11 @@ def _get_var_map(id_, name, type_, category, ruleset, rulename):
             '%type': type_,
             '%category': category,
             '%ruleset': ruleset,
-            '%rulename': rulename
+            '%rulename': rulename,
+            '%help': help
             }
 
-VARS = _get_var_map(None, None, None, None, None, None).keys()
+VARS = _get_var_map(None, None, None, None, None, None, None).keys()
 
 class FullType(object):
     """
@@ -199,7 +201,8 @@ class ReFilter(CacheFilter):
                                component.type,
                                component.category,
                                self.rule.ruleset,
-                               self.rule.name)
+                               self.rule.name,
+                               self.rule.help)
         var_value = substitute(var_map, self.var)
         match = re.match(self.pattern, var_value)
         return (match and self.eq == '=~') or (not match and self.eq == '!~')
@@ -218,10 +221,11 @@ class ScriptFilter(CacheFilter):
                                component.type,
                                component.category,
                                self.rule.ruleset,
-                               self.rule.name)
+                               self.rule.name,
+                               self.rule.help)
 
         cmd_string = substitute(var_map, self.rule.filter)
-        cmd = shlex.split(cmd_string.encode())
+        cmd = shlex.split(to_str_from_unicode(cmd_string, should_be_uni=True))
         _LOGGER.debug("%s: calling filter cmd: %s", self.rule.name, cmd)
         try:
             popen = subprocess.Popen(cmd,
@@ -261,6 +265,7 @@ def _find_match(rules, components):
         for rule in rules:
             if rule.match_type(component):
                 if rule.pass_filter(component):
+                    #test_unicode("%s" % component, False, 'FIND_MATCH')
                     _LOGGER.debug("Component %s has been" + \
                                   " filtered in by rule %s ",
                                   component, rule)
@@ -306,7 +311,8 @@ class Rule(object):
                  action,
                  depsfinder,
                  dependson,
-                 comments):
+                 comments, 
+                 help):
 
         if (ruleset is None or \
                 name is None or \
@@ -332,6 +338,7 @@ class Rule(object):
         # if None convert to an empty set to prevent special case treatment.
         self.dependson = set() if dependson is None else set(dependson)
         self.comments = comments
+        self.help = help
 
     def __eq__(self, other):
         return self.ruleset == other.ruleset and self.name == self.name
@@ -595,7 +602,9 @@ class Component(object):
         return self.id.__hash__()
 
     def __str__(self):
+        #print("STR")
         return "%s" % (self.id)
+        #return "%s" % to_str_from_unicode(self.id, should_be_uni=True)
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
@@ -637,7 +646,6 @@ class DepGraph(object):
         self._compute()
 
 
-
     def _compute(self):
         """
         Compute the dependency graph.
@@ -670,6 +678,7 @@ class DepGraph(object):
         """
         # Find out if the rule has already been applied to the given
         # component
+
         attributes = self.dag.node_attributes(component.id)
         for (rulename, action) in attributes:
             last_rule_char = rulename.rfind('?')
@@ -712,7 +721,8 @@ class DepGraph(object):
                                component.type,
                                component.category,
                                self.ruleset.name,
-                               rule.name)
+                               rule.name,
+                               rule.help)
 
         action = substitute(var_map, rule.action)
         _LOGGER.info("%s.action(%s): %s", rule.name, component.id, action)
@@ -744,10 +754,11 @@ class DepGraph(object):
                                component.type,
                                component.category,
                                self.ruleset.name,
-                               rule.name)
+                               rule.name,
+                               rule.help)
         cmd = substitute(var_map, depsfinder)
         _LOGGER.debug("Calling depsfinder for component %s: %s", component, cmd)
-        popen_args = shlex.split(cmd.encode())
+        popen_args = shlex.split(to_str_from_unicode(cmd, should_be_uni=True))
         try:
             popen = subprocess.Popen(popen_args,
                                      stdout=subprocess.PIPE,
@@ -765,7 +776,7 @@ class DepGraph(object):
                                 "applying rule %s to component %s: %s",
                             rule, component, msg_err)
         deps = set()
-        with StringIO(unicode(msg_std)) as reader:
+        with StringIO(to_unicode(msg_std)) as reader:
             for dep in reader:
                 dep_id = dep.strip()
                 if len(dep_id) == 0:

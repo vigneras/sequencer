@@ -23,13 +23,15 @@ Sequencer DB Management
 from ConfigParser import RawConfigParser, DuplicateSectionError
 from os import path
 from sequencer.commons import get_version, UnknownRuleSet, SequencerError, \
-    replace_if_none, NONE_VALUE, DuplicateRuleError, NoSuchRuleError
+    replace_if_none, NONE_VALUE, DuplicateRuleError, NoSuchRuleError, \
+    replace_if_none_by_uni, test_unicode, UnicodeConfigParser, \
+    to_str_from_unicode
 from sequencer.dgm.model import Rule
 import hashlib
 import logging
 import os
-
-
+import sys
+import codecs
 
 __author__ = "Pierre Vigneras"
 __copyright__ = "Copyright (c) 2010 Bull S.A.S."
@@ -43,16 +45,21 @@ def _update_hash(checksum, rule):
     """
     Update the given checksum with all required fields of the given rule.
     """
-    checksum.update(str(rule.ruleset))
-    checksum.update(str(rule.name))
+    checksum.update(to_str_from_unicode(rule.ruleset, should_be_uni=True))
+    checksum.update(to_str_from_unicode(rule.name, should_be_uni=True))
     for type_ in rule.types:
-        checksum.update(str(type_))
+        checksum.update(to_str_from_unicode(type_, should_be_uni=True))
     # Do not take filter into account
     # ruleset_h.update(str(rule.filter))
-    checksum.update(str(rule.action))
-    checksum.update(str(rule.depsfinder))
+    checksum.update(to_str_from_unicode(replace_if_none_by_uni(rule.action), \
+                    should_be_uni=True))
+    checksum.update(to_str_from_unicode(replace_if_none_by_uni(rule.depsfinder), \
+                    should_be_uni=True))
+    checksum.update(to_str_from_unicode(replace_if_none_by_uni(rule.help), \
+                    should_be_uni=True))
     for dep in rule.dependson:
-        checksum.update(str(dep))
+    checksum.update(to_str_from_unicode(replace_if_none_by_uni(dep), \
+                    should_be_uni=True))
     # Do not take comment into account
     # ruleset_h.update(str(rule.comments))
 
@@ -87,6 +94,7 @@ def create_rule_from_strings_array(given_row):
         dependson = None if row[6] is None else [str.strip(x)
                                                  for x in row[6].split(',')]
     comments = row[7]
+    help = row[8] #if row[8] is not None else unicode(None)
     return Rule(ruleset,
                 name,
                 types,
@@ -94,7 +102,8 @@ def create_rule_from_strings_array(given_row):
                 action,
                 depsfinder,
                 dependson,
-                comments)
+                comments,
+                help)
 
 class SequencerFileDB(object):
     """
@@ -133,8 +142,12 @@ class SequencerFileDB(object):
             if index == -1:
                 continue
             ruleset_name = entry[:index]
-            config = RawConfigParser()
-            config.read(self._get_config_filename_for(ruleset_name))
+            config = UnicodeConfigParser()
+            
+            config_file = self._get_config_filename_for(ruleset_name)
+            with codecs.open(config_file, 'r', encoding='utf-8') as f:
+                config.readfp(f)
+
             if _LOGGER.isEnabledFor(logging.DEBUG):
                 _LOGGER.debug("Ruleset found: %s with rules: %s",
                               ruleset_name,
@@ -194,8 +207,12 @@ class SequencerFileDB(object):
         """
         Create a single entry in the DB.
         """
+        # NB: it is OK to remove the conversion to str because all the args used
+        # to create a Rule are unicode-typed (done in the main).
+        # As create_rule_from_string_array converts the string "None" to 
+        # the value None, we have to convert it back.
         config = self.config_for_ruleset.setdefault(rule.ruleset,
-                                                    RawConfigParser())
+                                                    UnicodeConfigParser())
         _LOGGER.info("Adding rule: %s to %s", rule, str(config.sections()))
         try:
             config.add_section(rule.name)
@@ -204,12 +221,25 @@ class SequencerFileDB(object):
                           " -> raising DuplicateRuleError", dse)
             raise DuplicateRuleError(rule.ruleset, rule.name)
         config.set(rule.name, 'types', ",".join(rule.types))
-        config.set(rule.name, 'filter', rule.filter)
-        config.set(rule.name, 'action', str(rule.action))
-        config.set(rule.name, 'depsfinder', str(rule.depsfinder))
+
+        config.set(rule.name, 'filter', replace_if_none_by_uni(rule.filter))
+
+        # was "... str(rule.action))"
+        config.set(rule.name, 'action', replace_if_none_by_uni(rule.action))
+
+        # was "... str(rule.depsfinder))"
+        config.set(rule.name, 'depsfinder', 
+                    replace_if_none_by_uni(rule.depsfinder))
+
         config.set(rule.name, 'dependson',
-                   NONE_VALUE if len(rule.dependson) == 0 else ",".join(rule.dependson))
-        config.set(rule.name, 'comments', str(rule.comments))
+                   NONE_VALUE if len(rule.dependson) == 0 else u",".join(rule.dependson))
+
+        # was "... str(rule.comments))"
+        config.set(rule.name, 'comments', replace_if_none_by_uni(rule.comments))
+
+        # was "... str(rule.help))"
+        config.set(rule.name, 'help', replace_if_none_by_uni(rule.help))
+
         if commit:
             self._commit_all_changes([rule.ruleset])
 
@@ -296,7 +326,7 @@ class SequencerFileDB(object):
         # has been specified
         if new_ruleset is not None:
             new_config = self.config_for_ruleset.setdefault(new_ruleset,
-                                                            RawConfigParser())
+                                                            UnicodeConfigParser())
             if new_config.has_section(section_name):
                 raise ValueError("Cannot move (%s, %s)" % (ruleset, name) + \
                                      " to (%s, %s):" % (new_ruleset,
@@ -333,7 +363,11 @@ class SequencerFileDB(object):
         # Update
         final_config = config if new_ruleset is None else new_config
         for record in record_set:
-            final_config.set(section_name, str(record[0]), str(record[1]))
+            # Was : str(record[0]), str(record[1]). Unnecessary because all the
+            # args used are unicode-typed (done in the main).
+            final_config.set(section_name, record[0],
+                                replace_if_none_by_uni(record[1]))
+
         _LOGGER.debug("Final config: %s",
                       final_config.items(section_name))
 
@@ -389,6 +423,7 @@ class SequencerFileDB(object):
             row.append(config.get(section, 'depsfinder'))
             row.append(config.get(section, 'dependson'))
             row.append(config.get(section, 'comments'))
+            row.append(config.get(section, 'help'))
             rule = create_rule_from_strings_array(row)
             result[rule.name] = rule
 
@@ -487,7 +522,8 @@ class SequencerSQLDB(object):
             "depsfinder text, " + \
             "dependson text, " + \
             "comments text, " + \
-            "CONSTRAINT ruleset_name PRIMARY KEY (ruleset, name)," + \
+            "help text, " + \
+            "CONSTRAINT ruleset_name PRIMARY KEY (ruleset, name)," +\
             "CONSTRAINT not_empty CHECK (LENGTH(types) > 0 AND" + \
             " LENGTH(filter) > 0 AND " + \
             "(depsfinder ISNULL OR LENGTH(depsfinder) > 0)))"
@@ -505,7 +541,7 @@ class SequencerSQLDB(object):
         Create a single entry in the DB.
         """
         _LOGGER.info("Adding rule: %r", rule)
-        dependson = None if len(rule.dependson) == 0 \
+        dependson =  None if len(rule.dependson) == 0 \
             else ",".join(rule.dependson)
 
         # test if name and ruleset already exists
@@ -514,7 +550,7 @@ class SequencerSQLDB(object):
                                         (rule.ruleset, rule.name),
                                         fetch=True)
         if len(rows) == 0:
-            self.execute("INSERT INTO sequencer VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            self.execute("INSERT INTO sequencer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (rule.ruleset,
                           rule.name,
                           ",".join(rule.types),
@@ -522,7 +558,8 @@ class SequencerSQLDB(object):
                           rule.action,
                           rule.depsfinder,
                           dependson,
-                          rule.comments))
+                          rule.comments,
+                          rule.help))
         else:
             raise DuplicateRuleError(rule.ruleset, rule.name)
 

@@ -49,11 +49,13 @@ import logging
 import optparse
 import os, sys
 import resource
+import codecs
 
 import sequencer
 from sequencer.tracer import init_trace
 from sequencer.chain import cli as chain_cli
-from sequencer.commons import get_package_name, get_version, get_basedir, get_lastcommit
+from sequencer.commons import get_package_name, get_version, get_basedir, \
+                get_lastcommit, to_unicode, replace_if_none_by_uni
 from sequencer.dgm import cli as dgm_cli
 from sequencer.dgm.db import SequencerFileDB
 from sequencer.ise import cli as ise_cli
@@ -82,29 +84,30 @@ def add2path(path):
     """
     if path is not None and len(path) > 0:
         _logger.info("Including %s in current $PATH", path)
+        path = to_str_from_unicode(path, should_be_uni=True)
         os.environ['PATH'] = os.environ['PATH'] + ":" + path
 
 def _change_dir(option, opt_str, value, parser, *args):
     """
     Callback handler used during options parsing when the dir
     option has been specified.
-    This callback stores the directory specified and then call
+    This callback stores the directory specified and then calls
     _update_usage().
     """
     assert len(args) == 1
     usage_parms = args[0]
-    usage_parms['dir'] = value
+    usage_parms['dir'] = to_unicode(value)
     _update_usage(parser, usage_parms)
 
 def _change_base(option, opt_str, value, parser, *args):
     """
     Callback handler used during options parsing when the base
     option has been specified.  This callback stores the directory
-    specified and then call _update_usage().
+    specified and then calls _update_usage().
     """
     assert len(args) == 1
     usage_parms = args[0]
-    usage_parms['base'] = value
+    usage_parms['base'] = to_unicode(value)
     _update_usage(parser, usage_parms)
 
 def _update_usage(parser, usage_parms):
@@ -119,13 +122,18 @@ def _update_usage(parser, usage_parms):
     # Ruleset are shortcut for 'chain ruleset'
     shortcuts = rules_map.keys()
     for action in shortcuts:
-        usage_line = "\t%s" % action
+        # get help in the first action that corresponds
+        for key in rules_map[action].keys():
+          # take the first corresponding help
+          help = replace_if_none_by_uni(rules_map[action][key].help).split("\n")[0]
+          break
+
+        usage_line = "\t%s : %s" % (action, help)
         shortcut_usage.append(usage_line)
         usage_data_for[action] = {'doc': None, 'main':chain_cli.chain}
 
-    normal_usage = _get_normal_usage(usage_data_for)
+    normal_usage = _get_normal_usage(basedir, usage_data_for)
 
-    cmd_name = os.path.basename(sys.argv[0])
     usage = "%prog [global_options]" + \
         " <action> [action_options] <action parameters>\n" + \
         "\n" + tab() + "<normal actions>:\n" + \
@@ -144,21 +152,41 @@ def _update_usage(parser, usage_parms):
     usage_parms['data'] = usage_data_for
     usage_parms['shortcuts'] = shortcuts
 
-def _get_normal_usage(usage_data_for):
+def _get_normal_usage(basedir, usage_data_for):
     """
-    Returns the normal sequencer usage taken from each sequencer layer cli.
+    Returns the normal sequencer usage (if there's one) taken from the conf
+    file, or from each sequencer layer CLI (if there isn't).
     """
+    abspath = os.path.abspath(basedir)
+    allowed = 'all'
+
+    if os.path.exists(basedir):
+        _logger.debug("Reading entries from %s", abspath)
+        
+        config_file = os.path.join(abspath, "config")
+
+        config = ConfigParser.RawConfigParser()
+        config.read(config_file)
+        # If there is no normalset section or if allowed is not declared,
+        # allow all the normal actions.
+        # If allowed is empty, forbid all normal actions.
+        try:
+            allowed = config.get('normalset', 'allowed')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            pass
+
     normal_usage = []
     for cli in [dgm_cli, ism_cli, ise_cli, chain_cli]:
         usage_data = cli.get_usage_data()
         for action_name in usage_data:
             if action_name in usage_data_for:
                 raise ValueError("Ouch! Duplicate action name found: %s" %\
-                                 action_name)
-            usage_line = "\t%s: %s" %\
-                         (action_name, usage_data[action_name]['doc'])
-            normal_usage.append(usage_line)
-            usage_data_for[action_name] = usage_data[action_name]
+                                action_name)
+            if allowed == 'all' or action_name in allowed:
+                usage_line = ("\t%s: %s" %\
+                            (action_name, usage_data[action_name]['doc']))
+                normal_usage.append(usage_line)
+                usage_data_for[action_name] = usage_data[action_name]
 
     return normal_usage
 
@@ -185,23 +213,36 @@ def _get_config_from(basedir):
     config.add_section(ise_cli.SEQEXEC_ACTION_NAME)
     config_file = os.path.join(basedir, "config")
     _logger.debug("Reading configuration file: %s", config_file)
-    config.read(config_file)
+    
+    try:
+        with codecs.open(config_file, 'r', encoding='utf-8') as f:
+            config.readfp(f)
+    except IOError:
+        _logger.debug("No such config file: %s", config_file)
+
     return config
 
 def main():
     """
     The main! ;-)
     """
-    parser = optparse.OptionParser()
+    # optparse only handles error messages in ascii -> give him the command 
+    # name in ascii; prevents UnicodeDecodeError
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    #progname=prog=to_unicode(sys.argv[0]).encode('ascii', 'replace')
+    parser = optparse.OptionParser(prog=progname)
     parser.disable_interspersed_args()
     usage_parms = dict()
-    usage_parms['base'] = ''
+    usage_parms['base'] = u''
     usage_parms['dir'] = get_basedir()
     usage_parms['data'] = dict()
     _update_usage(parser, usage_parms)
 
+    # optparse only handles help messages in ascii -> give him the default 
+    # basedir (that will appear in the help) in ascii
     parser.add_option('-d', '--dir', dest="dir", type='string', nargs=1,
-                      default=get_basedir(),
+                      default=get_basedir().encode('ascii', 'replace'),
                       action="callback", callback=_change_dir,
                       callback_args = (usage_parms,),
                       help='Specify the configuration directory.' + \
@@ -286,9 +327,9 @@ def main():
         data = usage_data_for[action]
         # Remove the action name if it is not a shortcut
         if action not in shortcuts:
-            params = args[1:]
+            params = [to_unicode(p) for p in args[1:]]
         else:
-            params = args
+            params = [to_unicode(p) for p in args]
     except KeyError:
         parser.error("Unknown action: %s" % args[0])
 

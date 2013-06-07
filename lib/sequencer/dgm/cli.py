@@ -31,16 +31,17 @@ from pygraph.readwrite.markup import write
 from sequencer.commons import confirm, UnknownRuleSet, smart_display, \
     FILL_EMPTY_ENTRY, TRUNCATION_MAX_SIZE, REMOVE_UNSPECIFIED_COLUMNS, \
     write_graph_to, CyclesDetectedError, get_version, add_options_to, \
-    replace_if_none, DuplicateRuleError, NoSuchRuleError
+    replace_if_none, DuplicateRuleError, NoSuchRuleError, to_str_from_unicode,\
+    to_unicode, convert_uni_graph_to_str
 from sequencer.dgm.db import create_rule_from_strings_array
 from sequencer.dgm.model import RuleSet, Component, NOT_FORCE_OP
 from sequencer.ise import cli as ise_cli
+
 import logging
 import operator
 import optparse
 import os
 import sys
-
 
 
 
@@ -112,13 +113,13 @@ def get_usage_data():
 
 # Warning: Unicode strings are required here (see smart_display())
 RULES_HEADER = [u"ruleset", u"name", u"types", u"filter",
-                u"action", u"depsfinder", u"dependson", u"comments"]
+                u"action", u"depsfinder", u"dependson", u"comments", u"help"]
 CHECKSUM_HEADER = [u"ruleset", u"name", u"checksum"]
 
 
 def graphrules(db, config, args):
     """
-    This action fetch the rules from the DB sequencer table and call
+    This action fetches the rules from the DB sequencer table and calls
     the DGM stage for the computation of the related graph.
     This graph is then given to the user in the DOT format.
     """
@@ -126,7 +127,9 @@ def graphrules(db, config, args):
         " [action_options] ruleset"
     doc = GRAPHRULES_DOC + \
         " The graph is given in DOT format."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     add_options_to(parser, ['--out'], config)
     (options, action_args) = parser.parse_args(args)
     if len(action_args) != 1:
@@ -140,7 +143,7 @@ def graphrules(db, config, args):
 
 def knowntypes(db, config, args):
     """
-    This action fetch the rules from the DB sequencer table and call
+    This action fetches the rules from the DB sequencer table and calls
     the DGM stage for the creation of the corresponding ruleset and to fetch
     the root rules mapping. The result is then displayed on the screen.
     """
@@ -150,7 +153,9 @@ def knowntypes(db, config, args):
         " For each displayed types, the starting rules that will" + \
         " be applied on them for the" + \
         " computation of the dependency graph is also given."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     (options, action_args) = parser.parse_args(args)
     if len(action_args) != 1:
         parser.error(KNOWNTYPES_ACTION_NAME + ": ruleSet is missing.")
@@ -222,7 +227,9 @@ def _parse_depmake_cmdline(config, args):
         " [action_options] ruleset components_list"
     doc = DEPMAKE_DOC + \
         " The output format is suitable for the 'seqmake' action."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     parser.add_option('-F', '--Force',
                       metavar='RULE_LIST',
                       dest='force',
@@ -271,6 +278,7 @@ def get_component_set_from(config, components_lists):
     guesser = module.get_guesser(params)
     _LOGGER.info("Using guesser: %s", guesser)
     for cl in components_lists:
+        cl = to_str_from_unicode(cl, 'utf-8', True)
         (components_for, unknown) = guesser.guess_type(cl)
         if len(unknown) != 0:
             _LOGGER.warning("%s: [Unknown components]", unknown)
@@ -278,7 +286,8 @@ def get_component_set_from(config, components_lists):
             for type_ in components_for[table]:
                 components = NodeSet(components_for[table][type_])
                 for component in components:
-                    all_set.add(Component(component, type_, table))
+                    comp2 = to_unicode(component) 
+                    all_set.add(Component(comp2, type_, table))
     return all_set
 
 
@@ -296,7 +305,7 @@ def makedepgraph(config, rules, components_lists, options):
     depgraph = ruleset.get_depgraph(all_set, force_rule, docache)
     if _LOGGER.isEnabledFor(logging.DEBUG):
         _LOGGER.debug("Components set: %s",
-                      NodeSet.fromlist([x.id for x in all_set]))
+                      NodeSet.fromlist([to_str_from_unicode(x.id) for x in all_set]))
         _LOGGER.debug("Remaining: %s",
                       NodeSet.fromlist([str(x) for x in depgraph.remaining_components]))
         _LOGGER.debug("List: %s",
@@ -331,11 +340,13 @@ def depmake(db, config, args):
         dst = options.out
         _LOGGER.debug("Writing to: %s", dst)
 
-        output = write(depgraph.dag)
+        strgraph = convert_uni_graph_to_str(depgraph.dag)
+        output = write(strgraph)
         if dst == '-':
             _LOGGER.output(output)
         else:
             print(output, file=open(dst, "w"))
+
 
     # The DOT graph is written afterwards for two reasons:
     #
@@ -362,7 +373,7 @@ def _display(rules, columns_max):
                 rule.filter, rule.action, rule.depsfinder,
                 None if len(rule.dependson) == 0 \
                     else ','.join(sorted(rule.dependson)),
-                rule.comments]
+                rule.comments, rule.help]
         tab_values.append(["NONE" if x is None else x for x in line])
 
     _LOGGER.output(smart_display(RULES_HEADER, tab_values,
@@ -375,7 +386,9 @@ def dbcreate(db, config, args):
     """
     usage = "%prog [options] dbcreate"
     doc = DBCREATE_DOC
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     (options, dbcreate_args) = parser.parse_args(args)
     if len(dbcreate_args) != 0:
         parser.error(DBCREATE_ACTION_NAME + \
@@ -390,7 +403,9 @@ def dbdrop(db, config, args):
     """
     usage = "%prog [options] dbdrop"
     doc = DBDROP_DOC
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     add_options_to(parser, ['--Enforce'], config)
     (options, dbdrop_args) = parser.parse_args(args)
     if len(dbdrop_args) != 0:
@@ -413,7 +428,9 @@ def dbshow(db, config, args):
     usage = "%prog [options] dbshow [--columns=<column:max>,...] [ruleset]"
     doc = "Display the sequencer table (for the given " + \
         "ruleset if specified)."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     parser.add_option("", "--columns", dest="columns_list",
                       action='store',
                       help="Use the given list of 'column:max' for" + \
@@ -466,7 +483,7 @@ def dbshow(db, config, args):
         except UnknownRuleSet as urs:
             _LOGGER.error(DBSHOW_ACTION_NAME + str(urs))
             return 1
-    else:
+        else:
         rules_map = db.get_rules_map()
         all_rules = []
         for ruleset_name in rules_map:
@@ -479,7 +496,7 @@ def dbadd(db, config, args):
     Add a rule into the sequencer table.
     """
     usage = "%prog [options] dbadd ruleset name types " + \
-        "filter action depsfinder dependson comments"
+        "filter action depsfinder dependson comments help"
     doc = """Add a rule into the sequencer table. Multiple 'types'
 can be specified using the comma separator ','. Multiple dependencies
 can be specified using the comma separator ','. Both action and
@@ -489,12 +506,14 @@ prevent mis-interpretation by the running shell. Special 'NONE' and
 errors might be raised if DB constraints are not fulfilled. The DB
 specific error message should tell what the problem is. If unclear,
 have a look to the DB constraints."""
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     (options, add_args) = parser.parse_args(args)
-    if len(add_args) != 8:
+    if len(add_args) != 9:
         parser.error(DBADD_ACTION_NAME + \
                          ": expected %d arguments, given %d" % \
-                         (8, len(add_args)))
+                         (9, len(add_args)))
 
     add_args = [None if x == "NONE" or x == "NULL" else x for x in add_args]
     try:
@@ -512,7 +531,9 @@ def dbremove(db, config, args):
     usage = "%prog [options] dbremove [--nodeps] " + \
         "ruleset_name [rule_name...]"
     doc = """Remove all (given) rules from the sequencer table."""
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     add_options_to(parser, ['--Enforce', '--nodeps'], config)
     (options, remove_args) = parser.parse_args(args)
     if len(remove_args) < 1:
@@ -547,7 +568,9 @@ def dbupdate(db, config, args):
     doc = "Update each columns <column1>, <column2>, ... " + \
     "of the given rule ('ruleset', 'name') with values " + \
         "<value1>, <value2>, ... respectively in the sequencer table."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     add_options_to(parser, ['--nodeps'], config)
     (options, update_args) = parser.parse_args(args)
     if len(update_args) < 3:
@@ -575,6 +598,7 @@ def dbupdate(db, config, args):
         return 1
 
 
+
 def dbcopy(db, config, args):
     """
     Copy a rule or ruleset of the sequencer table.
@@ -583,7 +607,9 @@ def dbcopy(db, config, args):
         "ruleset_src[:rule_src] ruleset_dst"
     doc = "Copy ruleset_src to ruleset_dst" + \
         " or copy rule_src from ruleset_src to ruleset_dest."
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     (options, copy_args) = parser.parse_args(args)
     if len(copy_args) < 2:
         parser.error(DBCOPY_ACTION_NAME + \
@@ -604,6 +630,7 @@ def dbcopy(db, config, args):
     except UnknownRuleSet:
         pass
 
+    rule_src = replace_if_none(rule_src)
     if rule_src is None and len(dst_set) != 0:
         _LOGGER.error(DBCOPY_ACTION_NAME + \
                                ": ruleset %s already exists!",
@@ -641,7 +668,9 @@ def dbchecksum(db, config, args):
     usage = "%prog [options] dbchecksum [ruleset]"
     doc = "Compute checksum for the specified ruleset " + \
     " (all if not specified)"
-    parser = optparse.OptionParser(usage, description=doc)
+    cmd = os.path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    parser = optparse.OptionParser(usage, description=doc, prog=progname)
     (options, action_args) = parser.parse_args(args)
     if len(action_args) > 1:
         parser.error(DBCHECKSUM_ACTION_NAME + \
