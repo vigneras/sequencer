@@ -683,6 +683,7 @@ def get_nodes_from(component_set):
         return component_set
     return component_set[0:index]
 
+
 # Code below taken from http://code.activestate.com/recipes/267662/ (r7)
 # and modified to our own needs.
 def indent(rows,
@@ -715,7 +716,7 @@ def indent(rows,
          the related column. 
     """
     if justify_functions is None:
-        justify_functions = [str.ljust] * len(rows[0])
+        justify_functions = [unicode.ljust] * len(rows[0])
     _LOGGER.debug("Justify: %s", justify_functions)
     if max_widths is None:
         max_widths = [0] * len(rows[0])
@@ -724,8 +725,8 @@ def indent(rows,
     def i2str(item, maxwidth):
         """Trasform the given row item into a final string."""
         if item is FILL_EMPTY_ENTRY:
-            return str(filler_char) * maxwidth
-        return str(item)
+            return filler_char * maxwidth
+        return item
 
     # closure for breaking logical rows to physical, using wrapfunc
     def rowWrapper(row):
@@ -749,7 +750,7 @@ def indent(rows,
     columns = map(None, *physicalRows)
     _LOGGER.debug("columns: %s", columns)
     # get the maximum of each column by the string length of its items
-    maxWidths = [max([len(str(item)) for item in column]) for column in columns]
+    maxWidths = [max([len(item) for item in column]) for column in columns]
     _LOGGER.debug("MaxWidths: %s", maxWidths)
     rowSeparator = headerChar * (len(prefix) + len(postfix) + sum(maxWidths) + \
                                  len(delim) * (len(maxWidths) - 1))
@@ -765,7 +766,12 @@ def indent(rows,
                                     width) in zip(row,
                                                   justify_functions,
                                                   maxWidths)]
-        print(prefix + delim.join(line) + postfix,
+
+        line_uni = [to_unicode(elt) for elt in line]
+        line_uni = prefix + delim.join(line_uni) + postfix
+        line_uni = to_str_from_unicode(line_uni)
+
+        print(line_uni,
               file=output)
         if separateRows or hasHeader:
             print(rowSeparator, file=output)

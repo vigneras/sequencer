@@ -269,7 +269,7 @@ class DGMUnicodeFullTest(FullInitTest):
         # The table is sent to output using logger.output()
         capturer = Capturer(self.logger)
         dgm_cli.knowntypes(self.db, self.config, uniargs)
-        data = capturer.getCaptured()
+        data = capturer.getCaptured().decode('utf-8')
 
         val = compare_to_ref("test_knowntypes", "table")
         assert data == val

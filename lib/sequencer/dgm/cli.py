@@ -169,7 +169,7 @@ def knowntypes(db, config, args):
     for type_ in sorted(mapping, key=lambda t: t[t.find('@') + 1]):
         for rule in mapping[type_]:
             line = [type_, rule.filter, rule.name, rule.action]
-            tab_values.append(["NONE" if x is None else x for x in line])
+            tab_values.append([u"NONE" if x is None else x for x in line])
 
     _LOGGER.output(smart_display([u"Type",
                                   u"Filter",
@@ -374,7 +374,7 @@ def _display(rules, columns_max):
                 None if len(rule.dependson) == 0 \
                     else ','.join(sorted(rule.dependson)),
                 rule.comments, rule.help]
-        tab_values.append(["NONE" if x is None else x for x in line])
+        tab_values.append([u"NONE" if x is None else x for x in line])
 
     _LOGGER.output(smart_display(RULES_HEADER, tab_values,
                                  vsep=u' | ', columns_max=columns_max))
@@ -483,7 +483,7 @@ def dbshow(db, config, args):
         except UnknownRuleSet as urs:
             _LOGGER.error(DBSHOW_ACTION_NAME + str(urs))
             return 1
-        else:
+    else:
         rules_map = db.get_rules_map()
         all_rules = []
         for ruleset_name in rules_map:

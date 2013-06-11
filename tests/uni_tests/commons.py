@@ -27,7 +27,8 @@ _handler.setFormatter(_formatter)
 _logger.addHandler(_handler)
 _logger.setLevel(logging.DEBUG)
 
-SRCDIR = u"./uni_tests"
+#SRCDIR = u"./tests/uni_tests"
+SRCDIR = os.path.dirname(__file__)
 BASEDIR = u"/tmp/testmmąöî"
 TESTFILE = os.path.join(BASEDIR, u"testmmąöî.rs")
 

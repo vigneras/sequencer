@@ -31,9 +31,9 @@ graph=digraph graphname {
     \n
 
 [test_knowntypes]
-table=*      Type | Filter | Rule Name | Action | *
-    -------------------------------------------
-    fake@mmąöî |  mmąöî |     mmąöî |  mmąöî | *
+table=Type       | Filter | Rule Name | Action
+    ========================================
+    fake@mmąöî | mmąöî  | mmąöî     | mmąöî *
     \n
-    
+
 

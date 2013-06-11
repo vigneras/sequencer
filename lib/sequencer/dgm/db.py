@@ -58,7 +58,7 @@ def _update_hash(checksum, rule):
     checksum.update(to_str_from_unicode(replace_if_none_by_uni(rule.help), \
                     should_be_uni=True))
     for dep in rule.dependson:
-    checksum.update(to_str_from_unicode(replace_if_none_by_uni(dep), \
+        checksum.update(to_str_from_unicode(replace_if_none_by_uni(dep), \
                     should_be_uni=True))
     # Do not take comment into account
     # ruleset_h.update(str(rule.comments))

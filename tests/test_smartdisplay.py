@@ -76,7 +76,7 @@ class SmartDisplayTest(unittest.TestCase):
         # Two columns only one remain
         output = smart_display([u"T1", u"T2"],
                                [[u"d1.1", u"d2.1"],
-                                [u"d1.2", "d2.2"]],
+                                [u"d1.2", u"d2.2"]],
                                columns_max={'T1':0})
         self.assertIsNone(re.search(r'^.*T1.*$', output,
                                     flags=re.MULTILINE),
@@ -94,7 +94,7 @@ class SmartDisplayTest(unittest.TestCase):
     def testSpecifySingleColumn(self):
         output = smart_display([u"T1", u"T2"],
                                [[u"d1.1", u"d2.1"],
-                                [u"d1.2", "d2.2"]],
+                                [u"d1.2", u"d2.2"]],
                                columns_max={'T2': REMOVE_UNSPECIFIED_COLUMNS})
         self.assertIsNone(re.search(r'^.*T1.*$', output,
                                     flags=re.MULTILINE),
@@ -112,7 +112,7 @@ class SmartDisplayTest(unittest.TestCase):
     def testSpecifyMultipleColumns(self):
         output = smart_display([u"T1", u"T2", u"T3"],
                                [[u"d1.1", u"d2.1", u"d3.1"],
-                                [u"d1.2", "d2.2", u"d3.2"]],
+                                [u"d1.2", u"d2.2", u"d3.2"]],
                                columns_max={u'T2': REMOVE_UNSPECIFIED_COLUMNS,
                                             u'T3': REMOVE_UNSPECIFIED_COLUMNS})
         self.assertIsNone(re.search(r'^.*T1.*$', output,
@@ -137,7 +137,7 @@ class SmartDisplayTest(unittest.TestCase):
     def testFILLERSpecified(self):
         output = smart_display([u"T1", u"T2"],
                                [[u"d1.1", u"d2.1"],
-                                [FILL_EMPTY_ENTRY, "d2.2"]])
+                                [FILL_EMPTY_ENTRY, u"d2.2"]])
         self.assertIsNotNone(re.search(r'^.*T1.*$', output,
                                        flags=re.MULTILINE),
                           output)
