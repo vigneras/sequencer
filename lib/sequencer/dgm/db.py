@@ -24,7 +24,7 @@ from ConfigParser import RawConfigParser, DuplicateSectionError
 from os import path
 from sequencer.commons import get_version, UnknownRuleSet, SequencerError, \
     replace_if_none, NONE_VALUE, DuplicateRuleError, NoSuchRuleError, \
-    replace_if_none_by_uni, test_unicode, UnicodeConfigParser, \
+    replace_if_none_by_uni, UnicodeConfigParser, \
     to_str_from_unicode
 from sequencer.dgm.model import Rule
 import hashlib
