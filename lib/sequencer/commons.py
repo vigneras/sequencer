@@ -145,33 +145,6 @@ class UnicodeConfigParser(RawConfigParser):
             fp.write("\n")
 
 
-def _print_full_test_string(aa):
-    i = 0
-    while i < len(aa):
-        mystr = aa[i]
-        print("[%2d] type : %s, contains: %s " % (i, type(mystr), repr(mystr)))
-        i += 1
-    print("len = %d" % i)
-
-
-def test_unicode(value, doprint=False, message=''):
-    aa = value
-    if type(aa) == str:
-        print("********** %s: STR: %s" % (message, aa))
-        if doprint:
-            _print_full_test_string(aa)
-            aa = to_unicode(aa)
-            _print_full_test_string(aa)
-    elif isinstance(value, unicode):
-        print("********** %s: UNI: %s" % (message, aa))
-        if doprint:
-            aa = to_unicode(aa)
-            _print_full_test_string(aa)
-    else:
-        print("********** %s: NEITHER STR NOR UNI§§: type = %s\n%s" % (message, 
-                                type(aa), repr(aa)))
-
-
 def to_unicode(value, encoding='utf-8'):
     """
     Returns a unicode object made from the value of the given string.

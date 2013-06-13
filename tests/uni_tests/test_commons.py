@@ -3,7 +3,7 @@
 
 import sequencer
 import sequencer.commons as lib
-import os, sys
+import os, sys, pwd
 
 from commons import BaseTest
 from sequencer.dgm import cli as dgm_cli
@@ -44,16 +44,42 @@ class CommonsUniTest(AbstractTest):
         assert noneuni == u"None"
     
     def test_get_basedir_nobase(self):
+
         ret = lib.get_basedir()
         cmdstr = lib.to_unicode(os.path.basename(sys.argv[0]))
+
+        cmdfile = lib.to_unicode(os.path.abspath(sys.argv[0]))
+        # Do not follow symbolic links
+        stat = os.lstat(cmdfile)
+        if stat.st_uid == 0:
+            # owner = root
+            expected = os.path.join(u'/etc', cmdstr)
+        else:
+            owner_data = pwd.getpwuid(stat.st_uid)
+            owner = lib.to_unicode(owner_data[0])
+            expected = os.path.join(owner_data[5], '.'+cmdstr)
+
         assert type(ret) == unicode
-        assert ret == u"/etc/" + cmdstr
+        assert ret == expected
     
     def test_get_basedir_base(self):
         ret = lib.get_basedir(u"mmąöî")
         cmdstr = lib.to_unicode(os.path.basename(sys.argv[0]))
+
+        cmdfile = lib.to_unicode(os.path.abspath(sys.argv[0]))
+        # Do not follow symbolic links
+        stat = os.lstat(cmdfile)
+        if stat.st_uid == 0:
+            # owner = root
+            expected = os.path.join(u"/etc", cmdstr, u"mmąöî")
+        else:
+            owner_data = pwd.getpwuid(stat.st_uid)
+            owner = lib.to_unicode(owner_data[0])
+            expected = os.path.join(owner_data[5], '.'+cmdstr, u"mmąöî")
+        
+
         assert type(ret) == unicode
-        assert ret == u"/etc/" + cmdstr + u"/mmąöî"
+        assert ret == expected 
     
     def test_confirm(self):
         pass
