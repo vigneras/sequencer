@@ -26,6 +26,12 @@ from logging import getLogger
 from pygraph.algorithms.accessibility import mutual_accessibility
 from pygraph.algorithms.searching import depth_first_search
 from pygraph.readwrite.dot import write
+from pygraph.classes.digraph import digraph
+from pygraph.classes.exceptions import InvalidGraphType
+from pygraph.classes.graph import graph
+from pygraph.classes.hypergraph import hypergraph
+from operator import itemgetter
+from ConfigParser import RawConfigParser
 import cStringIO
 import math
 import os
@@ -68,7 +74,104 @@ TRUNCATION_MAX_SIZE = len(TRUNCATION_REF)
 REMOVE_UNSPECIFIED_COLUMNS = -1
 
 # Use by replace_if_none
-NONE_VALUE = str(None)
+NONE_VALUE = unicode(None)
+
+
+def convert_uni_graph_to_str(G):
+    """
+    Returns a graph filled with str values only.
+    Inspired by pygraph.readwrite.markup.write
+    """
+    if (type(G) == graph):
+        gr = graph()
+    elif (type(G) == digraph ):
+        gr = digraph()
+    elif (type(G) == hypergraph ):
+        return write_hypergraph(G)
+    else:
+        raise InvalidGraphType
+
+    for each_node in G.nodes():
+        strnode = to_str_from_unicode(each_node, should_be_uni=True)
+        gr.add_node(strnode)
+
+        for each_attr in G.node_attributes(each_node):
+            strattr0 = to_str_from_unicode(each_attr[0], should_be_uni=True)
+            strattr1 = to_str_from_unicode(each_attr[1], should_be_uni=True)
+            gr.add_node_attribute(strnode, (strattr0, strattr1))
+
+    for edge_from, edge_to in G.edges():
+        strfrom = to_str_from_unicode(edge_from, should_be_uni=True)
+        strto = to_str_from_unicode(edge_to, should_be_uni=True)
+        strlabel = to_str_from_unicode(
+                        G.edge_label((edge_from, edge_to)),
+                        should_be_uni=True)
+        strweight = to_str_from_unicode(
+                        G.edge_weight((edge_from, edge_to)), 
+                        should_be_uni=True)
+        gr.add_edge((strfrom, strto))
+        gr.set_edge_label((strfrom, strto), strlabel)
+        gr.set_edge_weight((strfrom, strto), strweight)
+        for attr_name, attr_val in G.edge_attributes((edge_from, edge_to)):
+            stra_name = to_str_from_unicode(attr_name, should_be_uni=True)
+            stra_val = to_str_from_unicode(attr_val, should_be_uni=True)
+            gr.add_edge_attribute((edge_from, edge_to), (stra_name, stra_val))
+
+    return gr
+
+
+# Overriding of the write() function of RawConfigParser is necessary because 
+# it does not handle non-ascii characters
+# TODO it would be FAR FAR better to write a wrapper: would  convert a parser
+# that contains unicode data to a parser that contains str
+class UnicodeConfigParser(RawConfigParser):
+    def write(self, fp):
+        """Write an .ini-format representation of the configuration state."""
+        if self._defaults:
+            fp.write("[%s]\n" % DEFAULTSECT)
+            for (key, value) in self._defaults.items():
+                fp.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
+            fp.write("\n")
+        for section in self._sections:
+            fp.write("[%s]\n" % section.encode('utf-8'))
+            for (key, value) in self._sections[section].items():
+                if key == "__name__":
+                    continue
+                if (value is not None) or (self._optcre == self.OPTCRE):
+                    #the following line replaces:
+                    #key = " = ".join((key, str(value).replace('\n', '\n\t')))
+                    key = u" = ".join((key, value.replace(u'\n', u'\n\t')))
+                fp.write("%s\n" % (key.encode('utf-8')))
+            fp.write("\n")
+
+
+def to_unicode(value, encoding='utf-8'):
+    """
+    Returns a unicode object made from the value of the given string.
+    """
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, basestring):
+        try:
+            value = unicode(value, encoding)
+        except (UnicodeDecodeError):
+            value = value.decode('utf-8', 'replace')
+    return value
+
+
+def to_str_from_unicode(value, encoding='utf-8', should_be_uni=True):
+    """
+    Returns a string encoded from the given unicode object
+    """
+    if isinstance(value, unicode):
+        value = value.encode(encoding)
+        if not should_be_uni:
+            _LOGGER.warning("%s: is unicode-typed, should be a string" % value)
+    elif isinstance(value, basestring):
+        if should_be_uni:
+            _LOGGER.warning("%s: is a string, should be unicode-typed" % value)
+        pass
+    return value
 
 
 def replace_if_none(value):
@@ -79,24 +182,32 @@ def replace_if_none(value):
         else value
 
 
+def replace_if_none_by_uni(value):
+    """
+    Replace the given value by unicode "None" if it is considered none or empty
+    """
+    return NONE_VALUE if value is None or (value == NONE_VALUE or len(value) == 0) \
+        else value
+
+
 def get_basedir(base=None):
     """
     Returns the base directory for the fetching of rules and
     configuration files.
     This directory is based on the command name itself.
     """
-    cmd = os.path.basename(sys.argv[0])
-    cmdfile = os.path.abspath(sys.argv[0])
+    cmd = to_unicode(os.path.basename(sys.argv[0]))
+    cmdfile = to_unicode(os.path.abspath(sys.argv[0]))
     # Do not follow symbolic links
     stat = os.lstat(cmdfile)
     if stat.st_uid == 0:
-        owner = 'root'
-        confdir = os.path.join('/etc', cmd)
+        owner = u'root'
+        confdir = os.path.join(u'/etc', cmd)
     else:
         owner_data = pwd.getpwuid(stat.st_uid)
-        owner = owner_data[0]
-        confdir = os.path.join(owner_data[5], '.' + cmd)
-    _LOGGER.debug("Owner is %s; confdir starts at %s", (owner, confdir))
+        owner = to_unicode(owner_data[0])
+        confdir = to_unicode(os.path.join(owner_data[5], '.'+cmd))
+    _LOGGER.debug("Owner is %s; confdir starts at %s",  owner, confdir)
     if base is None:
         return confdir
     return os.path.join(confdir, base)
@@ -357,6 +468,10 @@ def confirm(prompt=None, resp=False):
     else:
         prompt = '%s [%s]|%s: ' % (prompt, 'n', 'y')
 
+    # raw_input does not handle unicode
+    if isinstance(prompt, unicode):
+        prompt = prompt.encode('utf-8')
+
     while True:
         ans = raw_input(prompt)
         if not ans:
@@ -541,6 +656,7 @@ def get_nodes_from(component_set):
         return component_set
     return component_set[0:index]
 
+
 # Code below taken from http://code.activestate.com/recipes/267662/ (r7)
 # and modified to our own needs.
 def indent(rows,
@@ -573,7 +689,7 @@ def indent(rows,
          the related column. 
     """
     if justify_functions is None:
-        justify_functions = [str.ljust] * len(rows[0])
+        justify_functions = [unicode.ljust] * len(rows[0])
     _LOGGER.debug("Justify: %s", justify_functions)
     if max_widths is None:
         max_widths = [0] * len(rows[0])
@@ -582,8 +698,8 @@ def indent(rows,
     def i2str(item, maxwidth):
         """Trasform the given row item into a final string."""
         if item is FILL_EMPTY_ENTRY:
-            return str(filler_char) * maxwidth
-        return str(item)
+            return filler_char * maxwidth
+        return item
 
     # closure for breaking logical rows to physical, using wrapfunc
     def rowWrapper(row):
@@ -607,7 +723,7 @@ def indent(rows,
     columns = map(None, *physicalRows)
     _LOGGER.debug("columns: %s", columns)
     # get the maximum of each column by the string length of its items
-    maxWidths = [max([len(str(item)) for item in column]) for column in columns]
+    maxWidths = [max([len(item) for item in column]) for column in columns]
     _LOGGER.debug("MaxWidths: %s", maxWidths)
     rowSeparator = headerChar * (len(prefix) + len(postfix) + sum(maxWidths) + \
                                  len(delim) * (len(maxWidths) - 1))
@@ -623,7 +739,12 @@ def indent(rows,
                                     width) in zip(row,
                                                   justify_functions,
                                                   maxWidths)]
-        print(prefix + delim.join(line) + postfix,
+
+        line_uni = [to_unicode(elt) for elt in line]
+        line_uni = prefix + delim.join(line_uni) + postfix
+        line_uni = to_str_from_unicode(line_uni)
+
+        print(line_uni,
               file=output)
         if separateRows or hasHeader:
             print(rowSeparator, file=output)
@@ -760,7 +881,7 @@ def output_graph(graph, root=None):
     """
     Returns a tuplet containing:
     - the result of the depth_first_search() function starting at 'root'
-      (is is a tuplet)
+      (is a tuplet)
     - a dot format output of the given graph (display it using graphviz
       dotty command)
     """
@@ -788,18 +909,19 @@ def write_graph_to(graph, file_name):
     Write the given graph to the given file_name. If 'file_name' ==
     '-', prints to stdout (using logger.output())
     """
-    nodes = graph.nodes()
+    strgraph = convert_uni_graph_to_str(graph)
+    nodes = strgraph.nodes()
     for node in nodes:
         # Attributes (also called label in pygraph) on nodes may be
         # actions (in the case of depgraph). They may contain symbols
         # (such as quote, double quote, colon, ...) that might confuse
         # the DOT graph format. So we remove all of them directly
         # since escaping seems a bit tricky for now.
-        attributes = graph.node_attributes(node)
+        attributes = strgraph.node_attributes(node)
         for attribute in attributes:
             attributes.remove(attribute)
 
-    dot = output_graph(graph)[1]
+    dot = output_graph(strgraph)[1]
     if file_name == '-':
         _LOGGER.output(dot)
     else:

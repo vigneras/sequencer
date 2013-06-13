@@ -104,7 +104,7 @@ class ActionUpdater(EventHandler):
         else:
             # Worker Popen
             err = worker.last_error()
-            _LOGGER.warning("%s: %s", self.action.id, err)
+            _LOGGER.warning("%s: %s", self.action.id.encode('utf-8'), err)
 
     def _update_remote_action(self, ssh_worker):
         """

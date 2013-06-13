@@ -28,9 +28,10 @@ ISE XML input file.
 from __future__ import print_function
 
 import optparse
+import codecs
 import sys
 from logging import getLogger
-from os import EX_OK
+from os import EX_OK, path
 
 from sequencer.commons import get_version, add_options_to
 from sequencer.ism.algo import order_mixed, \
@@ -78,8 +79,9 @@ def _parse(config, ism_args):
     doc = SEQMAKE_DOC + \
         " The input can be the output of the 'depmake' action." + \
         " The output can be used as an input of the 'seqexec' action."
-
-    opt_parser = optparse.OptionParser(usage, description=doc)
+    cmd = path.basename(sys.argv[0])
+    progname=to_unicode(cmd).encode('ascii', 'replace')
+    opt_parser = optparse.OptionParser(usage, description=doc, prog=progname)
     add_options_to(opt_parser, ['--file', '--out', '--algo'], config)
     (ism_options, action_args) = opt_parser.parse_args(ism_args)
     if len(action_args) != 0:
@@ -121,7 +123,7 @@ def seqmake(db, config, ism_args):
     dst = ism_options.out
     _LOGGER.debug("Writing to: %s", dst)
 
-    output = ET.tostring(xml_result, pretty_print=True)
+    output = ET.tostring(xml_result, pretty_print=True, encoding="UTF-8")
     if dst == '-':
         _LOGGER.output(output)
     else:

@@ -47,7 +47,8 @@ def create_rule(ruleset,
                 action=None,
                 depsfinder=None,
                 dependson=set(),
-                comments=""):
+                comments="",
+                help=""):
 
     return Rule(ruleset,
                 name,
@@ -56,7 +57,8 @@ def create_rule(ruleset,
                 action,
                 depsfinder,
                 dependson,
-                comments)
+                comments,
+                help)
 
 class AssertDB(BaseTest):
     def assertRuleInMap(self, rule, map_):
