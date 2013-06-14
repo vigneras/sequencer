@@ -269,12 +269,13 @@ def get_component_set_from(config, components_lists):
     all_set = set()
     module_name = config.get(DEPMAKE_ACTION_NAME, GUESSER_MODULE_NAME)
     _LOGGER.debug("Guesser module name: %s" , module_name)
-    module = __import__(module_name)
+    module = __import__(to_str_from_unicode(module_name, should_be_uni=True))
     # Go through sys.modules to find modules inside packages
     module = sys.modules[module_name]
     params = config.get(DEPMAKE_ACTION_NAME, GUESSER_PARAMS_NAME)
     params = replace_if_none(params)
     _LOGGER.debug("Guesser parameters: %s", params)
+    params = to_str_from_unicode(params)
     guesser = module.get_guesser(params)
     _LOGGER.info("Using guesser: %s", guesser)
     for cl in components_lists:
