@@ -170,7 +170,6 @@ def to_str_from_unicode(value, encoding='utf-8', should_be_uni=True):
     elif isinstance(value, basestring):
         if should_be_uni:
             _LOGGER.warning("%s: is a string, should be unicode-typed" % value)
-        pass
     return value
 
 
@@ -733,10 +732,13 @@ def indent(rows,
     # for physicalRows in logicalRows:
     for row in physicalRows:
         _LOGGER.debug("row: %s", row)
+        row2=[]
+        for r in row:
+            row2.append(to_unicode(r))
         line = [justify(i2str(item, width),
                         width) for (item,
                                     justify,
-                                    width) in zip(row,
+                                    width) in zip(row2,
                                                   justify_functions,
                                                   maxWidths)]
 
