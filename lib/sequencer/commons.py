@@ -4,7 +4,7 @@ This module defines common stuff to all sequencer modules.
 """
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
-# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+# Contributor: Pierre Vignéras <pierre.vigneras@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -696,7 +696,7 @@ def indent(rows,
 
     def i2str(item, maxwidth):
         """Trasform the given row item into a final string."""
-        if item is FILL_EMPTY_ENTRY:
+        if item == FILL_EMPTY_ENTRY:
             return filler_char * maxwidth
         return item
 

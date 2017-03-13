@@ -1,6 +1,6 @@
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
-# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+# Contributor: Pierre Vignéras <pierre.vigneras@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ Source:		%{src_tarall}
 # TODO: Specify the category your software belongs to
 Group:		Applications/System
 BuildRoot:	%{_tmppath}/%{name}-root
-Packager:	Pierre Vignéras <pierre.vigneras@bull.net>
+Packager:	Pierre Vignéras <pierre.vigneras@gmail.com>
 # TODO: Check here
 Distribution:	Fedora
 

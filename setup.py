@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
-# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+# Contributor: Pierre Vignéras <pierre.vigneras@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ from setuptools import setup, find_packages
 
 
 VERSION_FILE = 'VERSION'
-META_FILE = 'lib/sequencer/.metainfo'
+META_FILE = os.path.join('lib', 'sequencer', '.metainfo')
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -36,8 +36,8 @@ META_FILE = 'lib/sequencer/.metainfo'
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-if not os.access('bin/sequencer', os.F_OK):
-    os.symlink('sequencer', 'bin/sequencer')
+if not os.access(os.path.join('bin', 'sequencer'), os.F_OK):
+    os.symlink('sequencer', os.path.join('bin', 'sequencer'))
 
 try:
     with open(os.path.join(os.path.dirname(__file__), VERSION_FILE)) as version_file:
@@ -78,21 +78,21 @@ assert version is not None and len(version) > 0,\
 
 setup(name='sequencer',
       version=version,
-      package_dir={'': 'lib/'},
+      package_dir={'': 'lib'},
       packages=find_packages('lib'),
-      package_data={'': ['.metainfo', 'ise/ise.xsd']},
-      data_files=[('conf/', ['conf/config']),
-                  ('doc/misc', glob('doc/misc/*')),
-                  ('doc/man/man1', glob('doc/man/*.1')),
-                  ('doc/man/man5', glob('doc/man/*.5'))],
-      scripts=['bin/sequencer', 'bin/guesser'],
+      package_data={'': ['.metainfo', os.path.join('ise','ise.xsd')]},
+      data_files=[('conf', [os.path.join('conf','config')]),
+                  (os.path.join('doc', 'misc'), glob(os.path.join('doc','misc','*'))),
+                  (os.path.join('doc', 'man', 'man1'), glob(os.path.join('doc', 'man', '*.1'))),
+                  (os.path.join('doc', 'man', 'man5'), glob(os.path.join('doc', 'man', '*.5')))],
+      scripts=[os.path.join('bin', 'sequencer'), os.path.join('bin', 'guesser')],
       author='Pierre Vignéras',
-      author_email='pierre.vigneras@bull.net',
+      author_email='pierre.vigneras@gmail.com',
       maintainer='Pierre Vignéras',
-      maintainer_email='pierre.vigneras@bull.net',
+      maintainer_email='pierre.vigneras@gmail.com',
       license='GPL v3',
-      url='http://pv-bull.github.com/sequencer',
-      download_url = "http://github.com/downloads/pv-bull/sequencer/sequencer-%s.tar.gz" % version,
+      url='http://vigneras.github.com/sequencer',
+      download_url = "http://github.com/downloads/vigneras/sequencer/sequencer-%s.tar.gz" % version,
       platforms=['GNU/Linux', 'BSD', 'MacOSX'],
       keywords=['sequencer', 'executor', 'engine'],
       description='The sequencer is used to execute actions in a specified order (for example power on/off clusters)',

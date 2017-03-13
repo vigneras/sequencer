@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
-# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+# Contributor: Pierre Vignéras <pierre.vigneras@gmail.com>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 # First, register this application (call it 'packaging' for example) within github:
 # https://github.com/account/applications/new
 # Application Name -> packaging
-# URL -> https://github.com/pv-bull/sequencer
-# Callback URL -> https://github.com/pv-bull/sequencer
+# URL -> https://github.com/vigneras/sequencer
+# Callback URL -> https://github.com/vigneras/sequencer
 # Then with the client_id, ask for write access:
 # Go to https://github.com/login/oauth/authorize?client_id=...&scope=repo
 # Fetch the access_token:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright (C) Bull S.A.S (2010, 2011)
-# Contributor: Pierre Vignéras <pierre.vigneras@bull.net>
+# Contributor: Pierre Vignéras <pierre.vigneras@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -140,19 +140,20 @@ class SmartDisplayTest(unittest.TestCase):
                                 [FILL_EMPTY_ENTRY, u"d2.2"]])
         self.assertIsNotNone(re.search(r'^.*T1.*$', output,
                                        flags=re.MULTILINE),
-                          output)
+                             output)
         self.assertIsNotNone(re.search(r'^.*d1.*$', output,
                                        flags=re.MULTILINE),
-                          output)
+                             output)
         # Here a faked sample of what we are looking for:
-        match = re.search(r'^-+ +| +d2.2 $', '------- | d2.2',
+        match = re.search(r'^-+ +| +d2.2 $', '------ | d2.2',
                           flags=re.MULTILINE)
         print("Faked matching at: %s" % match.string[match.start():match.end()])
         assert match is not None
         # Now, doing the same on the actual output
+        print(output)
         match = re.search(r'^-+ +| +d2.2 $', output, flags=re.MULTILINE)
         self.assertIsNotNone(match, output)
-        print(output)
+
         print("Matching at: %s" % match.string[match.start():match.end()])
         self.assertIsNotNone(re.search(r'^.*T2.*$', output,
                                        flags=re.MULTILINE),
