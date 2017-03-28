@@ -69,7 +69,7 @@ except IOError as ioe:
         for line in f:
             if not line.startswith('#'):
                 (key, sep, value) = line.partition(' = ')
-                print key, sep, value
+                print(key, sep, value)
                 if len(key) > 0 and key.endswith('version') and len(value) > 0:
                     version = value.strip()
 
